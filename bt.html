@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LED Lights Controller</title>
+  <script> window.w=window</script>
+</head>
+<body>
+  <button id="btConnect" onclick="window.ble()">BT Connect</button>
+  
+  <div id="btDash" style='display:none'> 
+    <style> input { width: 100px; clip: auto; } </style>
+    <div>
+      <div> Color One: <input type="color" id="colorOne" value="#ff00cb" /> </div>
+      <div> Color Two: <input type="color" id="colorTwo" value="#00ffcb" /> </div>
+      <div> Color Three: <input type="color" id="colorThree" value="#cb00ff" /> </div>
+      <div> Animation Delay: <input type="number" min="0" step="5" id="animationDelay" value="100"> </div>
+      <div> Brightness: <input type="number" step="5" min="0" max="256" id="brightness" value="100"/> </div>
+    </div>
+    <div style="display: flex; flex-direction: row; height: 65px;"> 
+      <!-- brightness, lightmode, colorone, colortwo, colorthree, animationdelay -->
+      <button onclick="w.myData.lightmode = 'setColor'; w.bleWrite()"> Set Color </button>
+      <button onclick="w.myData.lightmode = 'swipe'; w.bleWrite()"> Color Swipe </button>
+      <button onclick="w.myData.lightmode = 'theaterChase'; w.bleWrite()"> Theater Chase </button>
+      <button onclick="w.myData.lightmode = 'rainbow'; w.bleWrite()"> Rainbow </button>
+      <button onclick="w.myData.lightmode = 'theaterChaseRainbow'; w.bleWrite()"> Theater Chase Rainbow </button>
+      <button onclick="w.myData.lightmode = 'multiColorSizzle'; w.bleWrite()"> Multi-Color Sizzle </button>
+      <button onclick="w.myData.lightmode = 'multiColorWipe'; w.bleWrite()"> Multi-Color Wipe </button>
+      <button onclick="w.myData.lightmode = 'multiTheaterSizzle'; w.bleWrite()"> Multi-Theater Sizzle </button>
+      <button onclick="w.myData.lightmode = 'multiTheaterWipe'; w.bleWrite()"> Multi-Theater Wipe </button>
+      <button onclick="w.myData.colorone = w.getRandomColor(); w.bleWrite()">  RANDOM </button>
+    </div>
+  </div>
+
+  <div id="lights"></div>
+
+  <script type="module">
+    console.log('Starting'); 
+    async function loadScript() {  
+      let isDev = window.location.origin.includes('localhost'); 
+      let scriptPath = '/ipynb/lights.js';
+      try { 
+        const module = await import(scriptPath);
+      } catch (error) { 
+        console.error('Failed to load script from', scriptPath); 
+      }
+      window.lights = document.getElementById('lights');
+      console.log('window', window); 
+    } 
+    loadScript();
+  </script>
+</body>
+</html>

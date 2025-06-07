@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Lights Notebook Viewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/ipynb2web@latest/dist/ipynb2web.browser.mjs"
+    ></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        line-height: 1.6;
+      }
+      #content {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+      .loading {
+        text-align: center;
+        padding: 20px;
+        font-style: italic;
+        color: #666;
+      }
+      h2 {
+        display: inline-block;
+        margin: 0;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: bold;
+      }
+      /* Header styles */
+      .page-header {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-bottom: 1px solid #e9ecef;
+        margin-bottom: 20px;
+        text-align: center;
+        position: relative;
+      }
+      .page-header h1 {
+        margin: 0;
+        color: #333;
+        font-size: 2.2em;
+      }
+      .page-header .description {
+        margin: 10px 0 0;
+        color: #6c757d;
+        font-size: 1.1em;
+      }
+      .breadcrumb {
+        position: absolute;
+        top: 10px;
+        left: 15px;
+        font-size: 0.9em;
+        color: #6c757d;
+      }
+      .breadcrumb a {
+        color: #0275d8;
+        text-decoration: none;
+      }
+      .breadcrumb a:hover {
+        text-decoration: underline;
+      }
+      img { max-width: 100%; }
+      
+      /* Navigation styles */
+      .main-nav {
+        background-color: #333;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+      }
+      .main-nav ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+      }
+      .main-nav li {
+        margin: 0;
+        padding: 0;
+      }
+      .main-nav a {
+        display: block;
+        color: white;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+        position: relative;
+      }
+      .main-nav a:hover {
+        background-color: #555;
+      }
+      .main-nav .tooltip {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #555;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+        white-space: nowrap;
+        z-index: 1;
+      }
+      .main-nav a:hover .tooltip {
+        opacity: 1;
+      } 
+    </style>
+  </head>
+  <body>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="#" data-path="/">Home</a></li>
+        <li>
+          <a href="#" data-path="/about.html">About
+            <span class="tooltip">The Big Picture</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" data-path="/wled.html">Wled
+            <span class="tooltip">Reference Notes for installing WLED's firmware</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" data-path="/upload.html">Upload
+            <span class="tooltip">Using A serial terminal within an IPYNB to flash firmware and log/plot outputs</span>
+          </a>
+        </li> 
+        <li>
+          <a href="#" data-path="/notes.html">Misc Notes
+            <span class="tooltip">All the nitty gritty details</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <div id="content"></div>
+    <script type="module">
+      // Notebook path mapping
+      const notebookPaths = {
+        '/': './lights.ipynb',
+        '/index.html': './lights.ipynb',
+        '/about.html': './ipynb/aboutlights.ipynb',
+        '/notes.html': './ipynb/esp_notes.ipynb',
+        '/wled.html': './ipynb/wled.ipynb',
+        '/upload.html': './upload.ipynb' 
+      };
+
+      // Function to execute scripts in content
+      function executeScripts(element) {
+        // Get all script elements
+        const scripts = element.querySelectorAll('script');
+        scripts.forEach(oldScript => {
+          // Create a new script element
+          const newScript = document.createElement('script');
+          
+          // Copy all attributes from the old script to the new one
+          Array.from(oldScript.attributes).forEach(attr => {
+            newScript.setAttribute(attr.name, attr.value);
+          });
+          
+          // Set the content of the new script
+          newScript.textContent = oldScript.textContent;
+          
+          // Replace the old script with the new one
+          oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+      }
+
+      // Function to load notebook content
+      async function loadNotebook(notebookPath) {
+        const contentDiv = document.getElementById("content");
+        contentDiv.innerHTML = '<div class="loading">Loading notebook...</div>';
+        
+        try {
+          const meta = await ipynb2web.nb2json(notebookPath);
+          console.log("Loaded notebook:", notebookPath, meta);
+          
+          // Create the header with metadata
+          let headerHTML = '';
+          if (meta && meta.meta) {
+            // Extract page title - use filename if title is not available
+            const pageTitle = meta.meta.title || meta.meta.filename.replace('.ipynb', '') || 'Notebook';
+            
+            // Get current path from URL or stored data attribute
+            const currentPath = document.body.dataset.currentNotebook || '/';
+            const pageName = currentPath.split('/').pop().replace('.html', '');
+            
+            // Format the header title
+            const headerTitle = pageName === '' || pageName === 'index' 
+              ? pageTitle 
+              : `${pageTitle} - ${pageName.charAt(0).toUpperCase() + pageName.slice(1)}`;
+            
+            // Get description
+            const description = meta.meta.summary || '';
+            
+            // Create breadcrumb navigation
+            const breadcrumb = pageName === '' || pageName === 'index'
+              ? '<div class="breadcrumb">Home</div>'
+              : `<div class="breadcrumb"><a href="#" data-path="/">Home</a> &raquo; ${pageName.charAt(0).toUpperCase() + pageName.slice(1)}</div>`;
+            
+            headerHTML = `
+              <div class="page-header">
+                ${breadcrumb}
+                <h1>${headerTitle}</h1>
+                <p class="description">${description}</p>
+              </div>
+            `;
+          }
+          
+          // Insert the header and content
+          contentDiv.innerHTML = headerHTML + meta.content;
+          
+          // Execute any scripts in the content
+          executeScripts(contentDiv);
+          
+          // Intercept link clicks after content is loaded
+          interceptLinks();
+        } catch (error) {
+          console.error("Error loading notebook:", error);
+          contentDiv.innerHTML = `<div class="error">Error loading notebook: ${notebookPath}<br>${error.message}</div>`;
+        }
+      }
+
+      // Function to intercept link clicks
+      function interceptLinks() {
+        document.querySelectorAll('#content a').forEach(link => {
+          const href = link.getAttribute('href');
+          
+          // Only intercept relative links that match our mapping
+          if (href && (href.startsWith('./') || href.startsWith('/') || !href.includes('://'))) {
+            link.addEventListener('click', function(e) {
+              e.preventDefault();
+              
+              // Convert relative paths like "./about.html" to "/about.html"
+              let path = href.startsWith('./') ? href.substring(1) : href;
+              
+              // Handle paths without .html extension
+              if (!path.includes('.') && path !== '/') {
+                path = `${path}.html`;
+              }
+              
+              // If it's a known path, load the notebook
+              if (notebookPaths[path]) {
+                document.body.dataset.currentNotebook = path;
+                loadNotebook(notebookPaths[path]);
+              } else {
+                // Fallback for unknown paths - open in new tab instead of navigating
+                window.open(href, '_blank');
+              }
+            });
+          }
+        });
+
+        // Also handle breadcrumb links
+        document.querySelectorAll('.breadcrumb a[data-path]').forEach(link => {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const path = this.getAttribute('data-path');
+            if (notebookPaths[path]) {
+              document.body.dataset.currentNotebook = path;
+              loadNotebook(notebookPaths[path]);
+            }
+          });
+        });
+      }
+
+      // Set up main navigation
+      function setupMainNav() {
+        document.querySelectorAll('.main-nav a[data-path]').forEach(link => {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const path = this.getAttribute('data-path');
+            if (notebookPaths[path]) {
+              document.body.dataset.currentNotebook = path;
+              loadNotebook(notebookPaths[path]);
+            }
+          });
+        });
+      }
+
+      // Handle popstate events (browser back/forward)
+      window.addEventListener('popstate', function(e) {
+        const path = document.body.dataset.currentNotebook || '/';
+        const notebookPath = notebookPaths[path] || notebookPaths['/'];
+        loadNotebook(notebookPath);
+      });
+
+      // Initial load based on current URL
+      function loadInitialContent() {
+        const path = window.location.pathname;
+        const notebookPath = notebookPaths[path] || notebookPaths['/'];
+        document.body.dataset.currentNotebook = path;
+        loadNotebook(notebookPath);
+      }
+
+      // Start the app
+      setupMainNav();
+      loadInitialContent();
+    </script>
+  </body>
+</html>

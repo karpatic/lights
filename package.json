@@ -1,0 +1,31 @@
+{
+  "name": "esp32-lights-app",
+  "version": "1.0.0",
+  "description": "A web-based tool for connecting to and controlling ESP32-based LED light strips using WebBluetooth and Web Serial APIs. Features interactive Jupyter notebook documentation.",
+  "main": "index.html",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carloskarpati/lights.git"
+  },
+  "keywords": [
+    "esp32",
+    "arduino",
+    "led-lights",
+    "web-bluetooth",
+    "web-serial",
+    "iot",
+    "embedded",
+    "platformio",
+    "jupyter-notebooks",
+    "wled",
+    "led-strip",
+    "neopixel",
+    "fastled",
+    "audio-visualization",
+    "mesh-networking",
+    "github-pages"
+  ],
+  "author": "Carlos Karpati",
+  "license": "MIT", 
+  "homepage": "https://getfrom.net/lights/"
+}
