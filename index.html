@@ -10,75 +10,279 @@
       src="https://cdn.jsdelivr.net/npm/ipynb2web@latest/dist/ipynb2web.browser.mjs"
     ></script>
     <style>
-      h3{
-        display: inline-block;
+      :root {
+        --primary-color: #2563eb;
+        --secondary-color: #3b82f6;
+        --accent-color: #06b6d4;
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8fafc;
+        --bg-tertiary: #f1f5f9;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --text-muted: #94a3b8;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --radius-sm: 0.375rem;
+        --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
       }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
-        font-family: Arial, sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         margin: 0;
-        line-height: 1.6;
+        line-height: 1.7;
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+        color: var(--text-primary);
+        min-height: 100vh;
       }
+
       #content {
-        max-width: 900px;
+        max-width: 1000px;
         margin: 0 auto;
-        padding: 0 15px;
+        padding: 0 20px;
+        background: var(--bg-primary);
+        box-shadow: var(--shadow-lg);
+        border-radius: var(--radius-lg);
+        margin-top: 20px;
+        margin-bottom: 40px;
+        overflow: hidden;
       }
+
       .loading {
         text-align: center;
-        padding: 20px;
+        padding: 60px 20px;
         font-style: italic;
-        color: #666;
+        color: var(--text-secondary);
+        font-size: 1.1em;
+        background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+        background-size: 400% 400%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gradientMove 3s ease infinite;
       }
-      h2 {
-        display: inline-block;
-        margin: 0;
+
+      @keyframes gradientMove {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
       }
-      summary {
-        cursor: pointer;
-        font-weight: bold;
+
+      h1, h2, h3, h4, h5, h6 {
+        color: var(--text-primary);
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        margin-top: 2em;
+        margin-bottom: 1em;
       }
-      /* Header styles */
-      .page-header {
-        background-color: #f8f9fa;
-        padding: 15px;
-        border-bottom: 1px solid #e9ecef;
-        margin-bottom: 20px;
-        text-align: center;
+
+      h1 { font-size: 2.5rem; }
+      h2 { 
+        font-size: 2rem;
+        border-bottom: 3px solid var(--primary-color);
+        padding-bottom: 0.5rem;
         position: relative;
       }
+      h2::after {
+        content: '';
+        position: absolute;
+        bottom: -3px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+        border-radius: 2px;
+      }
+      h3 { 
+        font-size: 1.5rem;
+        color: var(--secondary-color);
+        display: inline-block;
+      }
+
+      p {
+        margin-bottom: 1.5em;
+        color: var(--text-secondary);
+      }
+
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--primary-color);
+        padding: 12px 16px;
+        background: var(--bg-tertiary);
+        border-radius: var(--radius-md);
+        margin: 1em 0;
+        transition: all 0.3s ease;
+        border-left: 4px solid var(--primary-color);
+        list-style: none; /* Hide default marker */
+      }
+
+      /* Hide default disclosure triangle/caret across browsers */
+      summary::-webkit-details-marker {
+        display: none;
+      }
+
+      summary::marker {
+        display: none;
+      }
+
+      details {
+        margin: 1.5em 0;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+      }
+
+      details[open] summary {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      /* Header styles */
+      .page-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, var(--accent-color) 100%);
+        padding: 40px 20px;
+        border-bottom: none;
+        margin-bottom: 0;
+        text-align: center;
+        position: relative;
+        color: white;
+        overflow: hidden;
+      }
+
+      .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.15"/><circle cx="20" cy="80" r="0.5" fill="white" opacity="0.15"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+      }
+
       .page-header h1 {
         margin: 0;
-        color: #333;
-        font-size: 1.8em;
+        color: white;
+        font-size: 2.5em;
+        font-weight: 800;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 1;
       }
+
       .page-header .description {
-        margin: 10px 0 0;
-        color: #6c757d;
-        font-size: 1em;
+        margin: 15px 0 0;
+        color: rgba(255,255,255,0.9);
+        font-size: 1.1em;
+        position: relative;
+        z-index: 1;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
       }
+
       .breadcrumb {
         position: absolute;
-        top: 10px;
-        left: 15px;
-        font-size: 0.8em;
-        color: #6c757d;
+        top: 15px;
+        left: 20px;
+        font-size: 0.9em;
+        color: rgba(255,255,255,0.8);
+        z-index: 1;
       }
+
       .breadcrumb a {
-        color: #0275d8;
+        color: rgba(255,255,255,0.9);
         text-decoration: none;
+        transition: color 0.3s ease;
       }
+
       .breadcrumb a:hover {
-        text-decoration: underline;
+        color: white;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
       }
-      img { max-width: 100%; }
-      
+
+      img { 
+        max-width: 100%;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-md);
+        margin: 1.5em 0;
+      }
+
+      /* Code and pre styles */
+      pre {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1.5em;
+        overflow-x: auto;
+        font-family: 'Fira Code', 'JetBrains Mono', 'Monaco', 'Consolas', monospace;
+        font-size: 0.9em;
+        line-height: 1.5;
+        margin: 1.5em 0;
+        box-shadow: var(--shadow-sm);
+      }
+
+      code {
+        background: var(--bg-tertiary);
+        padding: 0.2em 0.4em;
+        border-radius: var(--radius-sm);
+        font-family: 'Fira Code', 'JetBrains Mono', 'Monaco', 'Consolas', monospace;
+        font-size: 0.9em;
+        color: var(--primary-color);
+      }
+
+      pre code {
+        background: transparent;
+        padding: 0;
+        color: inherit;
+      }
+
+      /* Table styles */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 2em 0;
+        background: var(--bg-primary);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+      }
+
+      th, td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      th {
+        background: var(--bg-tertiary);
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      tr:hover {
+        background: var(--bg-secondary);
+        transition: background-color 0.2s ease;
+      }
+
       /* Navigation styles */
       .main-nav {
-        background-color: #333;
+        background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
         overflow: hidden;
         display: flex;
         justify-content: center;
+        box-shadow: var(--shadow-lg);
+        position: sticky;
+        top: 0;
+        z-index: 100;
       }
+
       .main-nav ul {
         list-style-type: none;
         margin: 0;
@@ -88,157 +292,258 @@
         justify-content: center;
         width: 100%;
       }
+
       .main-nav li {
         margin: 0;
         padding: 0;
         flex: 1;
         min-width: 0;
       }
+
       .main-nav a {
         display: block;
-        color: white;
+        color: rgba(255,255,255,0.9);
         text-align: center;
-        padding: 12px 8px;
+        padding: 16px 12px;
         text-decoration: none;
-        transition: background-color 0.3s;
+        transition: all 0.3s ease;
         position: relative;
-        font-size: 0.9em;
+        font-size: 0.95em;
+        font-weight: 500;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      .main-nav a:hover {
-        background-color: #555;
+
+      .main-nav a::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: left 0.5s ease;
       }
+
+      .main-nav a:hover {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      }
+
+      .main-nav a:hover::before {
+        left: 100%;
+      }
+
       .main-nav .tooltip {
         position: absolute;
         top: 100%;
         left: 50%;
         transform: translateX(-50%);
-        background-color: #555;
+        background: var(--text-primary);
         color: white;
-        padding: 5px 10px;
-        border-radius: 4px;
-        font-size: 0.7em;
+        padding: 8px 12px;
+        border-radius: var(--radius-md);
+        font-size: 0.8em;
         opacity: 0;
-        transition: opacity 0.3s;
+        transition: all 0.3s ease;
         pointer-events: none;
         white-space: nowrap;
-        z-index: 1;
+        z-index: 1000;
         max-width: 200px;
         word-wrap: break-word;
         white-space: normal;
+        box-shadow: var(--shadow-md);
       }
+
       .main-nav a:hover .tooltip {
         opacity: 1;
+        transform: translateX(-50%) translateY(4px);
       }
-      
+
+      /* List styles */
+      ul, ol {
+        padding-left: 2em;
+        margin: 1.5em 0;
+      }
+
+      li {
+        margin: 0.5em 0;
+        color: var(--text-secondary);
+      }
+
+      ul li::marker {
+        color: var(--primary-color);
+      }
+
+      /* Blockquote styles */
+      blockquote {
+        border-left: 4px solid var(--primary-color);
+        margin: 2em 0;
+        padding: 1em 2em;
+        background: var(--bg-secondary);
+        border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        font-style: italic;
+        color: var(--text-secondary);
+        box-shadow: var(--shadow-sm);
+      }
+
+      /* Link styles */
+      a {
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: color 0.3s ease;
+        font-weight: 500;
+      }
+
+      a:hover {
+        color: var(--secondary-color);
+        text-decoration: underline;
+      }
+
       /* Mobile Responsive Styles */
       @media (max-width: 768px) {
+        body {
+          background: var(--bg-primary);
+        }
+        
+        #content {
+          margin: 0;
+          border-radius: 0;
+          box-shadow: none;
+        }
+        
         .page-header {
-          padding: 15px 10px;
+          padding: 30px 15px;
         }
+        
         .page-header h1 {
-          font-size: 1.5em;
+          font-size: 2em;
         }
+        
         .page-header .description {
-          font-size: 0.9em;
+          font-size: 1em;
         }
+        
         .breadcrumb {
           position: static;
           text-align: center;
-          margin-bottom: 10px;
-          font-size: 0.8em;
+          margin-bottom: 15px;
+          font-size: 0.9em;
         }
+        
         #content {
-          padding: 0 10px;
+          padding: 0 15px;
         }
+        
         .main-nav ul {
           flex-direction: column;
         }
+        
         .main-nav li {
           flex: none;
         }
+        
         .main-nav a {
-          padding: 15px;
+          padding: 18px;
           font-size: 1em;
-          border-bottom: 1px solid #555;
+          border-bottom: 1px solid rgba(255,255,255,0.1);
           white-space: normal;
         }
+        
         .main-nav .tooltip {
-          display: none; /* Hide tooltips on mobile */
+          display: none;
         }
-      }
-      
-      @media (max-width: 480px) {
-        .page-header h1 {
-          font-size: 1.3em;
-        }
-        .page-header .description {
-          font-size: 0.85em;
-        }
-        #content {
-          padding: 0 8px;
-        }
-        .main-nav a {
-          padding: 12px;
-          font-size: 0.9em;
-        }
-      }
-      
-      /* Enhanced content responsiveness */
-      @media (max-width: 768px) {
-        /* Make tables horizontally scrollable */
+        
+        h1 { font-size: 2rem; }
+        h2 { font-size: 1.75rem; }
+        h3 { font-size: 1.25rem; }
+        
         table {
           display: block;
           overflow-x: auto;
           white-space: nowrap;
         }
         
-        /* Adjust code blocks */
         pre {
           overflow-x: auto;
           font-size: 0.85em;
         }
-        
-        /* Responsive images */
-        img {
-          max-width: 100%;
-          height: auto;
+      }
+
+      @media (max-width: 480px) {
+        .page-header h1 {
+          font-size: 1.75em;
         }
-      } 
+        
+        .page-header .description {
+          font-size: 0.95em;
+        }
+        
+        #content {
+          padding: 0 12px;
+        }
+        
+        .main-nav a {
+          padding: 15px;
+          font-size: 0.95em;
+        }
+        
+        summary {
+          padding: 10px 12px;
+        }
+      }
+
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* Focus styles for accessibility */
+      a:focus, summary:focus {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+        border-radius: var(--radius-sm);
+      }
+
+      /* Print styles */
+      @media print {
+        .main-nav, .breadcrumb {
+          display: none;
+        }
+        
+        .page-header {
+          background: none !important;
+          color: black !important;
+          padding: 20px 0;
+        }
+        
+        #content {
+          box-shadow: none;
+          max-width: none;
+        }
+      }
     </style>
   </head>
   <body>
-    <nav class="main-nav">
-      <ul>
-        <li><a href="#" data-path="/">Home</a></li> 
-        <li>
-          <a href="#" data-path="/wled.html">Wled
-            <span class="tooltip">Reference Notes for installing WLED's firmware</span>
-          </a>
-        </li>
-        <li>
-          <a href="#" data-path="/upload.html">Upload
-            <span class="tooltip">Using A serial terminal within an IPYNB to flash firmware and log/plot outputs</span>
-          </a>
-        </li> 
-        <li>
-          <a href="#" data-path="/notes.html">Misc Notes
-            <span class="tooltip">All the nitty gritty details</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
     <div id="content"></div>
     <script type="module">
       // Notebook path mapping
       const notebookPaths = {
-        '/': './lights.ipynb',
-        '/index.html': './lights.ipynb', 
-        '/notes.html': './ipynb/esp_notes.ipynb',
+        '/': './ipynb/index.ipynb',
+        '/index.html': './ipynb/index.ipynb', 
+        '/audio.html': './ipynb/audio.ipynb',
+        '/board_designs.html': './ipynb/board_design.ipynb',
+        '/esp_idf.html': './ipynb/esp_idf.ipynb',
+        '/esp_now.html': './ipynb/esp_now.ipynb',
+        '/licensing.html': './ipynb/licensing.ipynb',
+        '/lights.html': './ipynb/lights.ipynb',
+        '/plan.html': './ipynb/plan.ipynb',
+        '/upload.html': './ipynb/upload.ipynb', 
+        '/web.html': './ipynb/web.ipynb',
         '/wled.html': './ipynb/wled.ipynb',
-        '/upload.html': './upload.ipynb' 
       };
 
       // Function to execute scripts in content
@@ -284,7 +589,7 @@
             // Format the header title
             const headerTitle = pageName === '' || pageName === 'index' 
               ? pageTitle 
-              : `${pageTitle} - ${pageName.charAt(0).toUpperCase() + pageName.slice(1)}`;
+              : `${pageTitle}`;
             
             // Get description
             const description = meta.meta.summary || '';
@@ -292,13 +597,13 @@
             // Create breadcrumb navigation
             const breadcrumb = pageName === '' || pageName === 'index'
               ? '<div class="breadcrumb">Home</div>'
-              : `<div class="breadcrumb"><a href="#" data-path="/">Home</a> &raquo; ${pageName.charAt(0).toUpperCase() + pageName.slice(1)}</div>`;
+              : `<div class="breadcrumb"><a href="/">Home</a> &raquo; ${pageName.charAt(0).toUpperCase() + pageName.slice(1)}</div>`;
             
             headerHTML = `
               <div class="page-header">
                 ${breadcrumb}
                 <h1>${headerTitle}</h1>
-                <p class="description">${description}</p>
+                ${description ? `<p class="description">${description}</p>` : ''}
               </div>
             `;
           }
@@ -308,89 +613,78 @@
           
           // Execute any scripts in the content
           executeScripts(contentDiv);
-          
-          // Intercept link clicks after content is loaded
-          interceptLinks();
         } catch (error) {
           console.error("Error loading notebook:", error);
           contentDiv.innerHTML = `<div class="error">Error loading notebook: ${notebookPath}<br>${error.message}</div>`;
         }
       }
 
-      // Function to intercept link clicks
+      // Function to navigate to a path and update URL
+      function navigateToPath(path) {
+        if (notebookPaths[path]) {
+          document.body.dataset.currentNotebook = path;
+          // Update URL with hash instead of pathname
+          const hashPath = path === '/' ? '' : path.replace('.html', '');
+          window.history.pushState({ path: path }, '', hashPath ? `#${hashPath}` : '#');
+          loadNotebook(notebookPaths[path]);
+        }
+      }
+
+      // Function to intercept all link clicks
       function interceptLinks() {
-        document.querySelectorAll('#content a').forEach(link => {
+        // Add click event to document to catch all anchor clicks
+        document.addEventListener('click', function(e) {
+          // Check if clicked element is an anchor tag or inside one
+          const link = e.target.closest('a');
+          if (!link) return;
+          
           const href = link.getAttribute('href');
           
-          // Only intercept relative links that match our mapping
-          if (href && (href.startsWith('./') || href.startsWith('/') || !href.includes('://'))) {
-            link.addEventListener('click', function(e) {
-              e.preventDefault();
-              
-              // Convert relative paths like "./about.html" to "/about.html"
-              let path = href.startsWith('./') ? href.substring(1) : href;
-              
-              // Handle paths without .html extension
-              if (!path.includes('.') && path !== '/') {
-                path = `${path}.html`;
-              }
-              
-              // If it's a known path, load the notebook
-              if (notebookPaths[path]) {
-                document.body.dataset.currentNotebook = path;
-                loadNotebook(notebookPaths[path]);
-              } else {
-                // Fallback for unknown paths - open in new tab instead of navigating
-                window.open(href, '_blank');
-              }
-            });
+          // Only intercept links that start with "/" (internal links)
+          if (href && href.startsWith('/')) {
+            e.preventDefault();
+            
+            let path = href;
+            
+            // Handle paths without .html extension
+            if (!path.includes('.') && path !== '/') {
+              path = `${path}.html`;
+            }
+            
+            // Navigate to the path
+            navigateToPath(path);
           }
-        });
-
-        // Also handle breadcrumb links
-        document.querySelectorAll('.breadcrumb a[data-path]').forEach(link => {
-          link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const path = this.getAttribute('data-path');
-            if (notebookPaths[path]) {
-              document.body.dataset.currentNotebook = path;
-              loadNotebook(notebookPaths[path]);
-            }
-          });
+          // External links and other links will work normally
         });
       }
 
-      // Set up main navigation
-      function setupMainNav() {
-        document.querySelectorAll('.main-nav a[data-path]').forEach(link => {
-          link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const path = this.getAttribute('data-path');
-            if (notebookPaths[path]) {
-              document.body.dataset.currentNotebook = path;
-              loadNotebook(notebookPaths[path]);
-            }
-          });
-        });
-      }
-
-      // Handle popstate events (browser back/forward)
+      // Handle popstate events (browser back/forward) and hash changes
       window.addEventListener('popstate', function(e) {
-        const path = document.body.dataset.currentNotebook || '/';
+        const path = e.state?.path || getPathFromHash();
         const notebookPath = notebookPaths[path] || notebookPaths['/'];
+        document.body.dataset.currentNotebook = path;
         loadNotebook(notebookPath);
       });
 
-      // Initial load based on current URL
+      // Function to get path from current hash
+      function getPathFromHash() {
+        const hash = window.location.hash.substring(1); // Remove #
+        if (!hash) return '/';
+        return hash.includes('.') ? hash : `/${hash}.html`;
+      }
+
+      // Initial load based on current hash
       function loadInitialContent() {
-        const path = window.location.pathname;
+        const path = getPathFromHash();
         const notebookPath = notebookPaths[path] || notebookPaths['/'];
         document.body.dataset.currentNotebook = path;
+        // Set initial state
+        window.history.replaceState({ path: path }, '', window.location.hash || '#');
         loadNotebook(notebookPath);
       }
 
       // Start the app
-      setupMainNav();
+      interceptLinks();
       loadInitialContent();
     </script>
   </body>
