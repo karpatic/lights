@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lights Notebook Viewer</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script
@@ -8,6 +10,9 @@
       src="https://cdn.jsdelivr.net/npm/ipynb2web@latest/dist/ipynb2web.browser.mjs"
     ></script>
     <style>
+      h3{
+        display: inline-block;
+      }
       body {
         font-family: Arial, sans-serif;
         margin: 0;
@@ -16,7 +21,7 @@
       #content {
         max-width: 900px;
         margin: 0 auto;
-        padding: 0 20px;
+        padding: 0 15px;
       }
       .loading {
         text-align: center;
@@ -35,7 +40,7 @@
       /* Header styles */
       .page-header {
         background-color: #f8f9fa;
-        padding: 20px;
+        padding: 15px;
         border-bottom: 1px solid #e9ecef;
         margin-bottom: 20px;
         text-align: center;
@@ -44,18 +49,18 @@
       .page-header h1 {
         margin: 0;
         color: #333;
-        font-size: 2.2em;
+        font-size: 1.8em;
       }
       .page-header .description {
         margin: 10px 0 0;
         color: #6c757d;
-        font-size: 1.1em;
+        font-size: 1em;
       }
       .breadcrumb {
         position: absolute;
         top: 10px;
         left: 15px;
-        font-size: 0.9em;
+        font-size: 0.8em;
         color: #6c757d;
       }
       .breadcrumb a {
@@ -80,19 +85,27 @@
         padding: 0;
         display: flex;
         flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
       }
       .main-nav li {
         margin: 0;
         padding: 0;
+        flex: 1;
+        min-width: 0;
       }
       .main-nav a {
         display: block;
         color: white;
         text-align: center;
-        padding: 14px 16px;
+        padding: 12px 8px;
         text-decoration: none;
         transition: background-color 0.3s;
         position: relative;
+        font-size: 0.9em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       .main-nav a:hover {
         background-color: #555;
@@ -106,27 +119,100 @@
         color: white;
         padding: 5px 10px;
         border-radius: 4px;
-        font-size: 0.8em;
+        font-size: 0.7em;
         opacity: 0;
         transition: opacity 0.3s;
         pointer-events: none;
         white-space: nowrap;
         z-index: 1;
+        max-width: 200px;
+        word-wrap: break-word;
+        white-space: normal;
       }
       .main-nav a:hover .tooltip {
         opacity: 1;
+      }
+      
+      /* Mobile Responsive Styles */
+      @media (max-width: 768px) {
+        .page-header {
+          padding: 15px 10px;
+        }
+        .page-header h1 {
+          font-size: 1.5em;
+        }
+        .page-header .description {
+          font-size: 0.9em;
+        }
+        .breadcrumb {
+          position: static;
+          text-align: center;
+          margin-bottom: 10px;
+          font-size: 0.8em;
+        }
+        #content {
+          padding: 0 10px;
+        }
+        .main-nav ul {
+          flex-direction: column;
+        }
+        .main-nav li {
+          flex: none;
+        }
+        .main-nav a {
+          padding: 15px;
+          font-size: 1em;
+          border-bottom: 1px solid #555;
+          white-space: normal;
+        }
+        .main-nav .tooltip {
+          display: none; /* Hide tooltips on mobile */
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .page-header h1 {
+          font-size: 1.3em;
+        }
+        .page-header .description {
+          font-size: 0.85em;
+        }
+        #content {
+          padding: 0 8px;
+        }
+        .main-nav a {
+          padding: 12px;
+          font-size: 0.9em;
+        }
+      }
+      
+      /* Enhanced content responsiveness */
+      @media (max-width: 768px) {
+        /* Make tables horizontally scrollable */
+        table {
+          display: block;
+          overflow-x: auto;
+          white-space: nowrap;
+        }
+        
+        /* Adjust code blocks */
+        pre {
+          overflow-x: auto;
+          font-size: 0.85em;
+        }
+        
+        /* Responsive images */
+        img {
+          max-width: 100%;
+          height: auto;
+        }
       } 
     </style>
   </head>
   <body>
     <nav class="main-nav">
       <ul>
-        <li><a href="#" data-path="/">Home</a></li>
-        <li>
-          <a href="#" data-path="/about.html">About
-            <span class="tooltip">The Big Picture</span>
-          </a>
-        </li>
+        <li><a href="#" data-path="/">Home</a></li> 
         <li>
           <a href="#" data-path="/wled.html">Wled
             <span class="tooltip">Reference Notes for installing WLED's firmware</span>
@@ -149,8 +235,7 @@
       // Notebook path mapping
       const notebookPaths = {
         '/': './lights.ipynb',
-        '/index.html': './lights.ipynb',
-        '/about.html': './ipynb/aboutlights.ipynb',
+        '/index.html': './lights.ipynb', 
         '/notes.html': './ipynb/esp_notes.ipynb',
         '/wled.html': './ipynb/wled.ipynb',
         '/upload.html': './upload.ipynb' 
