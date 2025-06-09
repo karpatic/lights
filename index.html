@@ -627,6 +627,8 @@
           const hashPath = path === '/' ? '' : path.replace('.html', '');
           window.history.pushState({ path: path }, '', hashPath ? `#${hashPath}` : '#');
           loadNotebook(notebookPaths[path]);
+          // Scroll to top when navigating
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       }
 
@@ -664,6 +666,8 @@
         const notebookPath = notebookPaths[path] || notebookPaths['/'];
         document.body.dataset.currentNotebook = path;
         loadNotebook(notebookPath);
+        // Scroll to top when using browser navigation
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       });
 
       // Function to get path from current hash
