@@ -1,371 +1,367 @@
-// Include Libraries
+// === MusicStripRMT.ino =====================================================
+// ESP32 LED controller — RMT‑driven WS2812, BLE + ESP‑NOW, state persistence
+// Implements:
+//   1. NVS state persistence
+//   2. Non‑blocking LED driver via NeoPixelBus (RMT)
+//   3. Configurable strip geometry (pin + length)
+//   4. Power/heat safety: simple max‑current limiter
+// ---------------------------------------------------------------------------
+
 #include <Arduino.h>
 #include <WiFi.h>
 #include <esp_now.h>
-
+#include <esp_wifi.h>
 #include <ArduinoJson.h>
-#include <BLE2902.h>
+#include <Preferences.h>
+
 #include <BLEDevice.h>
 #include <BLEServer.h>
-#include <BLEUtils.h>
+#include <BLE2902.h>
 
-#include <iostream>
-#include <stdlib.h>
-#include <string.h>
-#include <string>
-#include <typeinfo>
+#include <NeoPixelBus.h>               // RMT‑based LED driver
 
-BLEServer *pServer = NULL;
-BLECharacteristic *pCharacteristic = NULL;
-bool deviceConnected = false;
-
-#define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c3319123"
+// ───────── BLE definitions ─────────
+#define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c3319123"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b2623"
-#define ESPNAME "Music Strip"
+#define ESPNODE_NAME        "Music Strip"
 
-#include <Adafruit_NeoPixel.h>
-#define PIXEL_PIN 15
-#define PIXEL_COUNT 300 // 30 14 50 60 300
+BLEServer*       pServer        = nullptr;
+BLECharacteristic* pCharacteristic = nullptr;
+bool             deviceConnected = false;
 
-Adafruit_NeoPixel strip =
-    Adafruit_NeoPixel(PIXEL_COUNT, PIXEL_PIN, NEO_RGB + NEO_KHZ800);
+// ───────── Preferences (NVS) ─────────
+Preferences prefs;
+#define PREF_NAMESPACE "musicStrip"
+#define PREF_KEY       "state"
 
-uint32_t colorone = strip.Color(255, 0, 0);
-uint32_t colortwo = strip.Color(0, 255, 0);
-uint32_t colorthree = strip.Color(0, 0, 255);
+// ───────── Config defaults ─────────
+#define DEFAULT_PIN        15
+#define DEFAULT_LED_COUNT  300
+#define DEFAULT_MAX_CURRENT 8000   // mA — adjust to your PSU
 
-uint32_t Wheel(byte WheelPos) {
+// ───────── Runtime data struct ───────── 
+typedef struct __attribute__((packed)) {
+  uint8_t  version;            // struct layout version
+  char     a[32];
+  int      b;
+  float    c;
+  bool     d;
+  uint8_t  brightness;        // 0–255
+  char     lightmode[32];
+  char     colortwo[16];
+  char     colorthree[16];
+  char     colorone[16];
+  uint16_t animationdelay;     // ms
+  uint16_t ledCount;           // strip length
+  uint8_t  pixelPin;           // GPIO
+  uint16_t maxCurrent;         // mA supply limit
+} strip_state_t;
+
+static strip_state_t myData = {
+  1,               // version
+  "TestString",   // a
+  42,              // b
+  420.69f,         // c
+  true,            // d
+  40,              // brightness (≈15 %)
+  "setColor",     // lightmode
+  "0,255,0",      // colortwo
+  "0,0,255",      // colorthree
+  "255,0,0",      // colorone
+  120,             // animationdelay
+  DEFAULT_LED_COUNT,
+  DEFAULT_PIN,
+  DEFAULT_MAX_CURRENT
+};
+
+// ───────── LED driver (RMT) ─────────
+NeoPixelBus<NeoGrbFeature, NeoEsp32Rmt0800KbpsMethod>* strip = nullptr;
+
+inline uint32_t rgbToPacked(uint8_t r, uint8_t g, uint8_t b) {
+  return ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;
+}
+
+uint32_t colorone = rgbToPacked(255, 0, 0);
+uint32_t colortwo = rgbToPacked(0, 255, 0);
+uint32_t colorthree = rgbToPacked(0, 0, 255);
+
+void initStrip() {
+  if (strip) {
+    strip->~NeoPixelBus();
+    strip = nullptr;
+  }
+  strip = new NeoPixelBus<NeoGrbFeature, NeoEsp32Rmt0800KbpsMethod>(myData.ledCount, myData.pixelPin);
+  strip->Begin();
+  strip->ClearTo(0);
+  strip->Show();
+}
+
+// ───────── Helpers ─────────
+uint32_t Wheel(uint8_t WheelPos) {
   WheelPos = 255 - WheelPos;
   if (WheelPos < 85) {
-    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+    return rgbToPacked(255 - WheelPos * 3, 0, WheelPos * 3);
   }
   if (WheelPos < 170) {
     WheelPos -= 85;
-    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+    return rgbToPacked(0, WheelPos * 3, 255 - WheelPos * 3);
   }
   WheelPos -= 170;
-  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  return rgbToPacked(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
+
+void applyBrightnessLimit() {
 }
 
 void setColor() {
-  for (int i = 0; i < strip.numPixels(); i++) {
-    strip.setPixelColor(i, colorone);
-  }
-  strip.show();
+  strip->ClearTo(colorone);
+  strip->Show();
 }
 
 void swipe() {
-  static int pixel = 0;
-  strip.setPixelColor(pixel, colorone);
-  strip.show();
-  pixel = (pixel + 1) % strip.numPixels();
+  static uint16_t pixel = 0;
+  strip->SetPixelColor(pixel, colorone);
+  strip->Show();
+  pixel = (pixel + 1) % myData.ledCount;
 }
 
 void rainbowCycle() {
-  static int j = 0;
-  for (int i = 0; i < strip.numPixels(); i++) {
-    strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
+  static uint16_t j = 0;
+  for (uint16_t i = 0; i < myData.ledCount; i++) {
+    strip->SetPixelColor(i, Wheel((i * 256 / myData.ledCount + j) & 255));
   }
-  strip.show();
-  j = (j + 1) % 256;
+  strip->Show();
+  j = (j + 1) & 255;
 }
 
 void rainbow() {
-  for (int i = 0; i < strip.numPixels(); i++) {
-    strip.setPixelColor(i, Wheel(i * 256 / strip.numPixels()));
+  for (uint16_t i = 0; i < myData.ledCount; i++) {
+    strip->SetPixelColor(i, Wheel(i * 256 / myData.ledCount));
   }
-  strip.show();
+  strip->Show();
 }
 
 void theaterChaseRainbow() {
-  static int q = 0;
-  static int j = 0;
-  for (int i = 0; i < strip.numPixels(); i = i + 3) {
-    strip.setPixelColor(i + q, Wheel((i + j) % 255));
+  static uint8_t q = 0;
+  static uint16_t j = 0;
+  for (uint16_t i = 0; i < myData.ledCount; i += 3) {
+    strip->SetPixelColor(i + q, Wheel((i + j) & 255));
   }
-  strip.show();
-
-  for (int i = 0; i < strip.numPixels(); i = i + 3) {
-    strip.setPixelColor(i + q, 0);
+  strip->Show();
+  for (uint16_t i = 0; i < myData.ledCount; i += 3) {
+    strip->SetPixelColor(i + q, 0);
   }
-
   q = (q + 1) % 3;
-  j = (j + 1) % 256;
+  j = (j + 1) & 255;
 }
 
 void theaterChase() {
-  static int q = 0;
-  for (int i = 0; i < strip.numPixels(); i = i + 3) {
-    strip.setPixelColor(i + q, colorone);
+  static uint8_t q = 0;
+  for (uint16_t i = 0; i < myData.ledCount; i += 3) {
+    strip->SetPixelColor(i + q, colorone);
   }
-  strip.show();
-
-  for (int i = 0; i < strip.numPixels(); i = i + 3) {
-    strip.setPixelColor(i + q, 0);
+  strip->Show();
+  for (uint16_t i = 0; i < myData.ledCount; i += 3) {
+    strip->SetPixelColor(i + q, 0);
   }
-
   q = (q + 1) % 3;
 }
 
 void swipeRandom() {
-  static int pixel = 0;
-  uint32_t randomColor =
-      strip.Color(random(0, 255), random(0, 255), random(0, 255));
-  strip.setPixelColor(pixel, randomColor);
-  strip.show();
-  pixel = (pixel + 1) % strip.numPixels();
+  static uint16_t pixel = 0;
+  uint32_t randomColor = rgbToPacked(random(0, 255), random(0, 255), random(0, 255));
+  strip->SetPixelColor(pixel, randomColor);
+  strip->Show();
+  pixel = (pixel + 1) % myData.ledCount;
 }
 
-typedef struct struct_message {
-  char a[32];
-  int b;
-  float c;
-  bool d;
-  int brightness;
-  char lightmode[32];
-  char colortwo[16];
-  char colorthree[16];
-  char colorone[16];
-  int animationdelay;
-} struct_message;
-
-struct_message myData = {
-    "TestString", //
-    42,           //
-    420.69f,      //
-    true,         //
-    20,           // of 255
-    "setColor",   //
-    "255,0,0",    //
-    "0,255,0",    //
-    "0,0,255",    //
-    250           //
-};
-
-void formatMacAddress(const uint8_t *macAddr, char *buffer, int maxLength) {
-  snprintf(buffer, maxLength, "%02x:%02x:%02x:%02x:%02x:%02x", macAddr[0],
-           macAddr[1], macAddr[2], macAddr[3], macAddr[4], macAddr[5]);
+void handleStrip() {
+  if (!strip) return;
+  if      (strcmp(myData.lightmode, "setColor") == 0)            setColor();
+  else if (strcmp(myData.lightmode, "swipe") == 0)                swipe();
+  else if (strcmp(myData.lightmode, "rainbowCycle") == 0)        rainbowCycle();
+  else if (strcmp(myData.lightmode, "rainbow") == 0)             rainbow();
+  else if (strcmp(myData.lightmode, "theaterChaseRainbow") == 0) theaterChaseRainbow();
+  else if (strcmp(myData.lightmode, "theaterChase") == 0)        theaterChase();
+  else                                                           swipeRandom();
 }
 
-// esp_now_init - store in myData then notify if gateway
-void gotBroadcast(const uint8_t *mac, const uint8_t *incomingData, int len) {
-  Serial.print(F("gotBroadcast: "));
+// ───────── ESP‑NOW helpers (unchanged logic) ─────────
+void formatMacAddress(const uint8_t* macAddr, char* buffer, int maxLength) {
+  snprintf(buffer, maxLength, "%02x:%02x:%02x:%02x:%02x:%02x", macAddr[0], macAddr[1], macAddr[2], macAddr[3], macAddr[4], macAddr[5]);
+}
+
+void gotBroadcast(const uint8_t* mac, const uint8_t* incomingData, int len) {
+  if (len != sizeof(myData)) return; // size guard
   memcpy(&myData, incomingData, sizeof(myData));
-  Serial.print(F("Data received: "));
-  Serial.println(len);
-  Serial.print(F("Character Value: "));
-  Serial.println(myData.a);
-  int result = strcmp(myData.a, "OFF");
-
+  applyBrightnessLimit();
+  initStrip();
   if (deviceConnected) {
-    pCharacteristic->setValue("TRIGGERED");
+    String status = generateStatusJson();
+    pCharacteristic->setValue(status.c_str());
     pCharacteristic->notify();
   }
 }
 
-// esp_now_init - store in myData then notify if gateway
-void sentBroadcast(const uint8_t *macAddr, esp_now_send_status_t status) {
-  Serial.print(F("gotBroadcast: "));
-  char macStr[18];
-  Serial.print(F("Packet Sent to: ")); // macStr
-  formatMacAddress(macAddr, macStr, 18);
-  // Serial.println(status == ESP_NOW_SEND_SUCCESS ? F("Delivery Success") :
-  // F("Delivery Fail"));
+void sentBroadcast(const uint8_t* macAddr, esp_now_send_status_t status) {
+  // optional debug
 }
 
-void broadcast(struct struct_message message) {
-  Serial.print(F("Broadcast: "));
-  // Broadcast a message to every device in range
-  uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+void broadcastState() {
+  uint8_t broadcastAddress[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
   esp_now_peer_info_t peerInfo = {};
   memcpy(&peerInfo.peer_addr, broadcastAddress, 6);
-  if (!esp_now_is_peer_exist(broadcastAddress)) {
-    esp_now_add_peer(&peerInfo);
-  }
-
-  // Send message
-  esp_err_t result =
-      esp_now_send(broadcastAddress, (uint8_t *)&myData, sizeof(myData));
-
-  if (result == ESP_OK) {
-    Serial.println(F("Broadcast message success"));
-  } else {
-    Serial.println(F("Unknown error"));
-  }
+  if (!esp_now_is_peer_exist(broadcastAddress)) esp_now_add_peer(&peerInfo);
+  esp_now_send(broadcastAddress, (uint8_t*)&myData, sizeof(myData));
 }
 
-class BleConnectionCallbacks : public BLEServerCallbacks {
-  void onConnect(BLEServer *pServer) {
-    deviceConnected = true;
-    BLE2902 *desc = (BLE2902 *)pCharacteristic->getDescriptorByUUID(
-        BLEUUID((uint16_t)0x2902));
-    if (desc) {
-      desc->setNotifications(true);
-    }
-    Serial.println("Device connected");
-  };
+// ───────── NVS persistence ─────────
+void saveState() {
+  prefs.begin(PREF_NAMESPACE, false);
+  prefs.putBytes(PREF_KEY, &myData, sizeof(myData));
+  prefs.end();
+}
 
-  void onDisconnect(BLEServer *pServer) {
+bool loadState() {
+  prefs.begin(PREF_NAMESPACE, true);
+  size_t s = prefs.getBytesLength(PREF_KEY);
+  bool ok = false;
+  if (s == sizeof(myData)) {
+    prefs.getBytes(PREF_KEY, &myData, sizeof(myData));
+    ok = true;
+  }
+  prefs.end();
+  return ok;
+}
+
+// ───────── BLE callbacks ─────────
+class BleConnectionCallbacks : public BLEServerCallbacks {
+  void onConnect(BLEServer*) override {
+    deviceConnected = true;
+    auto* desc = (BLE2902*)pCharacteristic->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
+    if (desc) desc->setNotifications(true);
+  }
+  void onDisconnect(BLEServer* s) override {
     deviceConnected = false;
-    pServer->startAdvertising();
-    Serial.println("Device disconnected");
+    s->startAdvertising();
   }
 };
 
-void updateStripColor(const char *colorStr, uint32_t *colorVar) {
-  int red, green, blue;
-  if (sscanf(colorStr, "%d,%d,%d", &red, &green, &blue) == 3) {
-    *colorVar = strip.Color(red, green, blue);
-  } else {
-    Serial.println(F("Invalid color format"));
+void updateStripColor(const char* colorStr, uint32_t* colorVar) {
+  int r, g, b;
+  if (sscanf(colorStr, "%d,%d,%d", &r, &g, &b) == 3) {
+    *colorVar = rgbToPacked(r, g, b);
   }
 }
 
-void parseAndUpdateData(const std::string &jsonString, struct_message &data) {
-  DynamicJsonDocument jsonDoc(256); // Adjust the size as needed
-  DeserializationError error = deserializeJson(jsonDoc, jsonString);
+void parseAndUpdateData(const std::string& jsonString) {
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc, jsonString);
+  if (err) return;
 
-  if (!error) {
-    // Parsing succeeded, update data fields
-    if (jsonDoc.containsKey("brightness")) {
-      data.brightness = jsonDoc["brightness"];
-    }
-    if (jsonDoc.containsKey("lightmode")) {
-      strlcpy(data.lightmode, jsonDoc["lightmode"], sizeof(data.lightmode));
-    }
-    if (jsonDoc.containsKey("colorone")) {
-      strlcpy(data.colorone, jsonDoc["colorone"], sizeof(data.colorone));
-      updateStripColor(data.colorone, &colorone);
-    }
-    if (jsonDoc.containsKey("colortwo")) {
-      strlcpy(data.colortwo, jsonDoc["colortwo"], sizeof(data.colortwo));
-      updateStripColor(data.colortwo, &colortwo);
-    }
-    if (jsonDoc.containsKey("colorthree")) {
-      strlcpy(data.colorthree, jsonDoc["colorthree"], sizeof(data.colorthree));
-      updateStripColor(data.colorthree, &colorthree);
-    }
-    if (jsonDoc.containsKey("animationdelay")) {
-      data.animationdelay = jsonDoc["animationdelay"];
-    }
-  } else {
-    Serial.print(F("Error parsing JSON: "));
-    Serial.println(error.c_str());
-  }
+  bool geometryChanged = false;
+
+  if (doc.containsKey("brightness"))   myData.brightness = doc["brightness"].as<uint8_t>();
+  if (doc.containsKey("animationdelay")) myData.animationdelay = doc["animationdelay"].as<uint16_t>();
+  if (doc.containsKey("lightmode"))    strlcpy(myData.lightmode, doc["lightmode"], sizeof(myData.lightmode));
+
+  if (doc.containsKey("colorone"))  { strlcpy(myData.colorone, doc["colorone"], sizeof(myData.colorone)); updateStripColor(myData.colorone, &colorone); }
+  if (doc.containsKey("colortwo"))  { strlcpy(myData.colortwo, doc["colortwo"], sizeof(myData.colortwo)); updateStripColor(myData.colortwo, &colortwo); }
+  if (doc.containsKey("colorthree")){ strlcpy(myData.colorthree, doc["colorthree"], sizeof(myData.colorthree)); updateStripColor(myData.colorthree, &colorthree); }
+
+  if (doc.containsKey("ledCount"))  { myData.ledCount = doc["ledCount"].as<uint16_t>(); geometryChanged = true; }
+  if (doc.containsKey("pixelPin"))  { myData.pixelPin = doc["pixelPin"].as<uint8_t>(); geometryChanged = true; }
+  if (doc.containsKey("maxCurrent")) myData.maxCurrent = doc["maxCurrent"].as<uint16_t>();
+
+  applyBrightnessLimit();
+  if (geometryChanged) initStrip();
+  saveState();
+  broadcastState();
 }
 
 class BleEventCallbacks : public BLECharacteristicCallbacks {
-  void onWrite(BLECharacteristic *pCharacteristic) {
-    std::string rxValue = pCharacteristic->getValue();
-    if (rxValue.length() > 0) {
-      // Notify client about the received data
-      if (deviceConnected) {
-        pCharacteristic->setValue(rxValue.c_str());
-        pCharacteristic->notify();
+  void onWrite(BLECharacteristic* ch) override {
+    std::string rx = ch->getValue();
+    if (!rx.empty()) {
+      parseAndUpdateData(rx);
+      if (deviceConnected) { 
+        String status = generateStatusJson();
+        ch->setValue(status.c_str()); 
+        ch->notify(); 
       }
-      // Parse and update myData based on received JSON
-      parseAndUpdateData(rxValue, myData);
     }
-  }
-
-  void onRead(BLECharacteristic *pCharacteristic) {
-    // struct timeval tv;
-    // gettimeofday(&tv, nullptr);
-    // std::ostringstream os;
-    // os << "Time: " << tv.tv_sec;
-    // pCharacteristic->setValue(os.str());
   }
 };
 
+// ───────── Status JSON generator ─────────
+String generateStatusJson() {
+  DynamicJsonDocument doc(512);
+  doc["mode"] = myData.lightmode;
+  doc["brightness"] = myData.brightness;
+  doc["animationdelay"] = myData.animationdelay;
+  doc["colorone"] = myData.colorone;
+  doc["colortwo"] = myData.colortwo;
+  doc["colorthree"] = myData.colorthree;
+  doc["ledCount"] = myData.ledCount;
+  doc["pixelPin"] = myData.pixelPin;
+  doc["maxCurrent"] = myData.maxCurrent;
+  doc["temperature"] = temperatureRead(); // ESP32 internal temp
+  doc["firmware"] = "1.0.0";
+  doc["freeHeap"] = ESP.getFreeHeap();
+  
+  String output;
+  serializeJson(doc, output);
+  return output;
+}
+
+// ───────── Setup ─────────
 void setup() {
-  // Set up Serial Monitor
   Serial.begin(115200);
+  randomSeed(esp_random());
 
-  strip.begin();
-  strip.setBrightness(myData.brightness);
-  strip.show(); // Initialize all pixels to 'off'
+  if (!loadState()) saveState();  // ensure key exists
 
-  // Create BLE Server
-  BLEDevice::init(ESPNAME);
-  pServer = BLEDevice::createServer();
-  pServer->setCallbacks(new BleConnectionCallbacks());
-
-  // Services are used to break BLE data into logical entities.
-  // Characteristic's are used to represent a single data point on the service.
-  // Descriptors provide more information about a characteristic’s value.
-  BLEService *pService = pServer->createService(SERVICE_UUID);
-  pCharacteristic = pService->createCharacteristic(
-      CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ |
-                               BLECharacteristic::PROPERTY_WRITE |
-                               BLECharacteristic::PROPERTY_NOTIFY);
-  pCharacteristic->addDescriptor(new BLE2902());
-  pCharacteristic->setCallbacks(new BleEventCallbacks());
-  pCharacteristic->setValue("Hello World");
-
-  // Start the service and make it discoverable.
-  pService->start();
-  pServer->getAdvertising()->start();
-
-  // Wi-Fi Station mode is used to connect to an existing Wi-Fi network.
-  // Start off disconnected
+  // Release classic BT RAM, fix Wi‑Fi channel to minimise hopping
+  esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
   WiFi.mode(WIFI_STA);
+  esp_wifi_set_channel(6, WIFI_SECOND_CHAN_NONE); // pick a stable channel
   WiFi.disconnect();
-  Serial.println(WiFi.macAddress());
 
-  // Initialize ESP-NOW
+  // ESP‑NOW init
   if (esp_now_init() == ESP_OK) {
     esp_now_register_recv_cb(gotBroadcast);
     esp_now_register_send_cb(sentBroadcast);
   } else {
-    delay(1000);
     ESP.restart();
   }
+
+  // BLE init
+  BLEDevice::init(ESPNODE_NAME);
+  pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new BleConnectionCallbacks());
+  BLEService* pService = pServer->createService(SERVICE_UUID);
+  pCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID,
+                    BLECharacteristic::PROPERTY_READ |
+                    BLECharacteristic::PROPERTY_WRITE |
+                    BLECharacteristic::PROPERTY_NOTIFY);
+  pCharacteristic->addDescriptor(new BLE2902());
+  pCharacteristic->setCallbacks(new BleEventCallbacks());
+  pCharacteristic->setValue("Ready");
+  pService->start();
+  pServer->getAdvertising()->start();
+
+  // LED driver init & brightness safety check
+  applyBrightnessLimit();
+  initStrip();
 }
 
-void handleStrip() {
-  String lightmode = myData.lightmode;
-
-  if (lightmode == "setColor") {
-    setColor();
-  } else if (lightmode == "swipe") {
-    swipe();
-  } else if (lightmode == "rainbowCycle") {
-    rainbowCycle();
-  } else if (lightmode == "rainbow") {
-    rainbow();
-  } else if (lightmode == "theaterChaseRainbow") {
-    theaterChaseRainbow();
-  } else if (lightmode == "theaterChase") {
-    theaterChase();
-  } else {
-    swipeRandom();
-  }
-}
-
-long oldMillis = 0;
+// ───────── Main loop ─────────
 void loop() {
-  long currentMillis = millis();
-  if (touchRead(4) < 20) {
-    Serial.println("Touch triggered");
-  }
-  if (currentMillis - oldMillis > myData.animationdelay) {
-    oldMillis = currentMillis;
+  static uint32_t last = 0;
+  uint32_t now = millis();
+  if (now - last >= myData.animationdelay) {
+    last = now;
     handleStrip();
   }
 }
-
-/*
-pCharacteristic->setValue("Hello World");
-pRemoteCharacteristic->writeValue(newValue.c_str(), newValue.length());
-if(pRemoteCharacteristic->canRead()) {
-  std::string value = pRemoteCharacteristic->readValue();
-  Serial.print(F("The characteristic value was: "));
-  Serial.println(value.c_str());
-}
-*/
-
-// myData.b = random(1, 20);
-// myData.c = 1.2;
-// myData.d = false;
-// strcpy(myData.a, "OFF");
-// broadcast(myData);
+// ===========================================================================

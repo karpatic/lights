@@ -5,43 +5,470 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LED Lights Controller</title>
   <script> window.w=window</script>
+  <style>
+    :root {
+      --primary-color: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary-color: #06b6d4;
+      --accent-color: #f59e0b;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+      --warning-color: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+      --border-radius: 12px;
+      --border-radius-lg: 16px;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      padding: 20px;
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .header p {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 1.1rem;
+      font-weight: 400;
+    }
+
+    .connect-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: var(--border-radius-lg);
+      padding: 40px;
+      text-align: center;
+      box-shadow: var(--shadow-xl);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .connect-card h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .connect-card p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      margin-bottom: 32px;
+    }
+
+    .connect-btn {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      border-radius: var(--border-radius);
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow-md);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .connect-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .connect-btn:active {
+      transform: translateY(0);
+    }
+
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--gray-400);
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .status-indicator.connected {
+      background: var(--success-color);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+    }
+
+    .status-indicator.connected::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 24px;
+      margin-top: 32px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: var(--border-radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .card h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card h3::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      border-radius: 2px;
+    }
+
+    .colors-grid, .settings-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .colors-grid {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .settings-grid {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-group label {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .color-input {
+      width: 100%;
+      height: 60px;
+      border: 3px solid var(--gray-200);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+      background: none;
+    }
+
+    .color-input:hover {
+      border-color: var(--primary-color);
+      transform: scale(1.02);
+    }
+
+    .color-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .number-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 500;
+      transition: var(--transition);
+      background: white;
+    }
+
+    .number-input:hover {
+      border-color: var(--gray-300);
+    }
+
+    .number-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .animation-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .anim-btn {
+      background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+      color: var(--text-primary);
+      border: 2px solid var(--gray-200);
+      padding: 16px 24px;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .anim-btn:hover {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+      color: white;
+      border-color: var(--primary-color);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .anim-btn:active {
+      transform: translateY(0);
+    }
+
+    .random-btn {
+      background: linear-gradient(135deg, var(--accent-color) 0%, #f97316 100%);
+      color: white;
+      border-color: var(--accent-color);
+      font-size: 1.1rem;
+    }
+
+    .random-btn:hover {
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      border-color: #f97316;
+    }
+
+    .animations-card {
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 16px;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+      }
+
+      .connect-card {
+        padding: 32px 24px;
+      }
+
+      .card {
+        padding: 24px;
+      }
+
+      .dashboard {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .colors-grid, .settings-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .animation-buttons {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 16px;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .connect-card {
+        padding: 24px 20px;
+      }
+
+      .card {
+        padding: 20px;
+      }
+    }
+
+    /* Loading animation */
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    .loading {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
 </head>
 <body>
-  <button id="btConnect" onclick="window.ble()">BT Connect</button>
-  
-  <div id="btDash" style='display:none'> 
-    <style> input { width: 100px; clip: auto; } </style>
-    <div>
-      <div> Color One: <input type="color" id="colorOne" value="#ff00cb" /> </div>
-      <div> Color Two: <input type="color" id="colorTwo" value="#00ffcb" /> </div>
-      <div> Color Three: <input type="color" id="colorThree" value="#cb00ff" /> </div>
-      <div> Animation Delay: <input type="number" min="0" step="5" id="animationDelay" value="100"> </div>
-      <div> Brightness: <input type="number" step="5" min="0" max="256" id="brightness" value="100"/> </div>
+  <div class="container">
+    <div class="header">
+      <h1>LED Controller</h1>
+      <p>Control your smart LED strips with precision and style</p>
     </div>
-    <div style="display: flex; flex-direction: row; height: 65px;"> 
-      <!-- brightness, lightmode, colorone, colortwo, colorthree, animationdelay -->
-      <button onclick="w.myData.lightmode = 'setColor'; w.bleWrite()"> Set Color </button>
-      <button onclick="w.myData.lightmode = 'swipe'; w.bleWrite()"> Color Swipe </button>
-      <button onclick="w.myData.lightmode = 'theaterChase'; w.bleWrite()"> Theater Chase </button>
-      <button onclick="w.myData.lightmode = 'rainbow'; w.bleWrite()"> Rainbow </button>
-      <button onclick="w.myData.lightmode = 'theaterChaseRainbow'; w.bleWrite()"> Theater Chase Rainbow </button>
-      <button onclick="w.myData.lightmode = 'multiColorSizzle'; w.bleWrite()"> Multi-Color Sizzle </button>
-      <button onclick="w.myData.lightmode = 'multiColorWipe'; w.bleWrite()"> Multi-Color Wipe </button>
-      <button onclick="w.myData.lightmode = 'multiTheaterSizzle'; w.bleWrite()"> Multi-Theater Sizzle </button>
-      <button onclick="w.myData.lightmode = 'multiTheaterWipe'; w.bleWrite()"> Multi-Theater Wipe </button>
-      <button onclick="w.myData.colorone = w.getRandomColor(); w.bleWrite()">  RANDOM </button>
-    </div>
-  </div>
 
-  <div id="lights"></div>
+    <div class="connect-card" id="connectCard">
+      <h2>Connect to Your LED Strip</h2>
+      <p>Establish a Bluetooth connection to start controlling your lights</p>
+      <button class="connect-btn" id="btConnect" onclick="window.ble()">
+        Connect via Bluetooth
+        <span class="status-indicator" id="statusIndicator"></span>
+      </button>
+    </div>
+
+    <div id="btDash" class="dashboard hidden">
+      <div class="card">
+        <h3>Colors</h3>
+        <div class="colors-grid">
+          <div class="control-group">
+            <label for="colorOne">Primary Color</label>
+            <input type="color" class="color-input" id="colorOne" value="#ff00cb" />
+          </div>
+          <div class="control-group">
+            <label for="colorTwo">Secondary Color</label>
+            <input type="color" class="color-input" id="colorTwo" value="#ff0000" />
+          </div>
+          <div class="control-group">
+            <label for="colorThree">Accent Color</label>
+            <input type="color" class="color-input" id="colorThree" value="#0000ff" />
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Settings</h3>
+        <div class="settings-grid">
+          <div class="control-group">
+            <label for="brightness">Brightness</label>
+            <input type="number" class="number-input" step="5" min="0" max="255" id="brightness" value="40"/>
+          </div>
+          <div class="control-group">
+            <label for="animationDelay">Speed (ms)</label>
+            <input type="number" class="number-input" min="1" max="65535" step="5" id="animationDelay" value="100">
+          </div>
+          <div class="control-group">
+            <label for="ledCount">LED Count</label>
+            <input type="number" class="number-input" min="15" max="1024" step="15" id="ledCount" value="50"/>
+          </div>
+          <div class="control-group">
+            <label for="pixelPin">Pixel Pin</label>
+            <input type="number" class="number-input" min="0" max="33" id="pixelPin" value="15"/>
+          </div>
+        </div>
+        <div class="control-group" style="margin-top: 20px;">
+          <label for="maxCurrent">Max Current (mA)</label>
+          <input type="number" class="number-input" min="500" max="20000" step="100" id="maxCurrent" value="8000"/>
+        </div>
+      </div>
+
+      <div class="card animations-card">
+        <h3>Animation Modes</h3>
+        <div class="animation-buttons">
+          <button class="anim-btn" onclick="w.myData.lightmode = 'setColor'; w.bleWrite()">Solid Color</button>
+          <button class="anim-btn" onclick="w.myData.lightmode = 'swipe'; w.bleWrite()">Color Swipe</button>
+          <button class="anim-btn" onclick="w.myData.lightmode = 'theaterChase'; w.bleWrite()">Theater Chase</button>
+          <button class="anim-btn" onclick="w.myData.lightmode = 'rainbow'; w.bleWrite()">Rainbow</button>
+          <button class="anim-btn" onclick="w.myData.lightmode = 'rainbowCycle'; w.bleWrite()">Rainbow Cycle</button>
+          <button class="anim-btn" onclick="w.myData.lightmode = 'theaterChaseRainbow'; w.bleWrite()">Theater Rainbow</button>
+          <button class="anim-btn random-btn" onclick="w.myData.colorone = w.getRandomColor(); w.bleWrite()">🎲 Random Colors</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="lights"></div>
+  </div>
 
   <script type="module">
     console.log('Starting'); 
     async function loadScript() {  
       let isDev = window.location.origin.includes('localhost'); 
-      let scriptPath = '/ipynb/lights.js';
+      let scriptPath = '/lights.js';
       try { 
         const module = await import(scriptPath);
+        console.log('lights.js loaded successfully');
       } catch (error) { 
         console.error('Failed to load script from', scriptPath); 
       }
@@ -49,6 +476,226 @@
       console.log('window', window); 
     } 
     loadScript();
+
+    // Debug: Check if color inputs are working
+    window.addEventListener('load', function() {
+      setTimeout(() => {
+        const colorInputs = document.querySelectorAll('input[type="color"]');
+        console.log('Found color inputs:', colorInputs.length);
+        colorInputs.forEach(input => {
+          console.log('Color input:', input.id, 'value:', input.value);
+          // Add manual test listener with BLE write functionality
+          input.addEventListener('input', function() {
+            console.log('Manual listener - Color input changed:', this.id, this.value);
+            
+            // Extract RGB values
+            let color = this.value.slice(1);
+            let r = parseInt(color.substr(0, 2), 16);
+            let g = parseInt(color.substr(2, 2), 16);
+            let b = parseInt(color.substr(4, 2), 16);
+            
+            // Map UI element IDs to data keys
+            const colorMap = {
+              'colorOne': 'colorone',
+              'colorTwo': 'colortwo', 
+              'colorThree': 'colorthree'
+            };
+            
+            const dataKey = colorMap[this.id];
+            if (dataKey && window.myData) {
+              window.myData[dataKey] = `${r},${g},${b}`;
+              console.log('Color updated:', dataKey, '=', window.myData[dataKey]);
+              
+              // Save settings
+              if (window.saveSettings) window.saveSettings();
+              
+              // Write to BLE if connected
+              if (window.charac && window.charac.service && window.charac.service.device && window.charac.service.device.gatt.connected) {
+                console.log('Writing color change to BLE...');
+                if (window.bleWrite) window.bleWrite();
+              } else {
+                console.log('BLE not connected, color saved locally only');
+              }
+            }
+          });
+        });
+      }, 500);
+    });
+
+    // Add connection status management
+    window.updateConnectionStatus = function(connected) {
+      const indicator = document.getElementById('statusIndicator');
+      const connectCard = document.getElementById('connectCard');
+      const dashboard = document.getElementById('btDash');
+      
+      console.log('updateConnectionStatus called with:', connected);
+      
+      if (connected) {
+        if (indicator) indicator.classList.add('connected');
+        if (connectCard) connectCard.classList.add('hidden');
+        if (dashboard) {
+          dashboard.classList.remove('hidden');
+          console.log('Dashboard now visible');
+        }
+      } else {
+        if (indicator) indicator.classList.remove('connected');
+        if (connectCard) connectCard.classList.remove('hidden');
+        if (dashboard) dashboard.classList.add('hidden');
+      }
+    };
+
+    // Monitor for connection status changes
+    window.checkConnectionStatus = function() {
+      const isConnected = window.charac && window.charac.service && window.charac.service.device && window.charac.service.device.gatt.connected;
+      const dashboard = document.getElementById('btDash');
+      const connectCard = document.getElementById('connectCard');
+      const statusIndicator = document.getElementById('statusIndicator');
+      
+      // Add debug output
+      if (window.lastConnectionState !== isConnected) {
+        console.log('Connection state changed:', window.lastConnectionState, '->', isConnected);
+        window.lastConnectionState = isConnected;
+      }
+      
+      if (isConnected && dashboard && dashboard.classList.contains('hidden')) {
+        console.log('Connection detected, showing dashboard');
+        dashboard.classList.remove('hidden');
+        dashboard.style.display = 'grid';
+        if (connectCard) connectCard.classList.add('hidden');
+        if (statusIndicator) statusIndicator.classList.add('connected');
+      } else if (!isConnected && dashboard && !dashboard.classList.contains('hidden')) {
+        console.log('Connection lost, hiding dashboard');
+        dashboard.classList.add('hidden');
+        if (connectCard) connectCard.classList.remove('hidden');
+        if (statusIndicator) statusIndicator.classList.remove('connected');
+      }
+    };
+
+    // Test BLE write function
+    window.testBLEWrite = function() {
+      if (window.bleWrite && window.myData) {
+        console.log('Testing BLE write with current data:', window.myData);
+        window.bleWrite();
+      } else {
+        console.error('BLE write function or myData not available');
+      }
+    };
+
+    // Add number input listeners for immediate updates
+    window.addEventListener('load', function() {
+      setTimeout(() => {
+        // Add listeners for number inputs
+        const numberInputs = document.querySelectorAll('input[type="number"]');
+        numberInputs.forEach(input => {
+          input.addEventListener('change', function() {
+            console.log('Number input changed:', this.id, this.value);
+            
+            const inputMap = {
+              'brightness': 'brightness',
+              'animationDelay': 'animationdelay',
+              'ledCount': 'ledCount',
+              'pixelPin': 'pixelPin',
+              'maxCurrent': 'maxCurrent'
+            };
+            
+            const dataKey = inputMap[this.id];
+            if (dataKey && window.myData) {
+              window.myData[dataKey] = parseInt(this.value);
+              console.log('Updated:', dataKey, '=', window.myData[dataKey]);
+              
+              if (window.saveSettings) window.saveSettings();
+              
+              // Write to BLE if connected
+              if (window.charac && window.charac.service && window.charac.service.device && window.charac.service.device.gatt.connected) {
+                console.log('Writing number change to BLE...');
+                if (window.bleWrite) {
+                  window.bleWrite();
+                } else {
+                  console.error('bleWrite function not available');
+                }
+              }
+            }
+          });
+        });
+        
+        // Debug: Check if color inputs are working
+        const colorInputs = document.querySelectorAll('input[type="color"]');
+        console.log('Found color inputs:', colorInputs.length);
+        colorInputs.forEach(input => {
+          console.log('Color input:', input.id, 'value:', input.value);
+          // Add manual test listener with BLE write functionality
+          input.addEventListener('input', function() {
+            console.log('Manual listener - Color input changed:', this.id, this.value);
+            
+            // Extract RGB values
+            let color = this.value.slice(1);
+            let r = parseInt(color.substr(0, 2), 16);
+            let g = parseInt(color.substr(2, 2), 16);
+            let b = parseInt(color.substr(4, 2), 16);
+            
+            // Map UI element IDs to data keys
+            const colorMap = {
+              'colorOne': 'colorone',
+              'colorTwo': 'colortwo', 
+              'colorThree': 'colorthree'
+            };
+            
+            const dataKey = colorMap[this.id];
+            if (dataKey && window.myData) {
+              window.myData[dataKey] = `${r},${g},${b}`;
+              console.log('Color updated:', dataKey, '=', window.myData[dataKey]);
+              
+              // Save settings
+              if (window.saveSettings) window.saveSettings();
+              
+              // Write to BLE if connected
+              if (window.charac && window.charac.service && window.charac.service.device && window.charac.service.device.gatt.connected) {
+                console.log('Writing color change to BLE...');
+                if (window.bleWrite) window.bleWrite();
+              } else {
+                console.log('BLE not connected, color saved locally only');
+              }
+            }
+          });
+        });
+      }, 500);
+    });
+
+    // Add manual test button (temporary)
+    window.addEventListener('DOMContentLoaded', function() {
+      // Add a test button for debugging
+      const header = document.querySelector('.header');
+      if (header) {
+        const testBtn = document.createElement('button');
+        testBtn.textContent = 'Test BLE Write';
+        testBtn.style.cssText = 'margin: 10px; padding: 10px 20px; background: #ff6b6b; color: white; border: none; border-radius: 8px; cursor: pointer;';
+        testBtn.onclick = window.testBLEWrite;
+        header.appendChild(testBtn);
+      }
+    });
+
+    // Override the original connection handling if it exists
+    window.addEventListener('load', function() {
+      console.log('Page fully loaded');
+      // Check if already connected on page load
+      setTimeout(() => {
+        if (window.charac && window.charac.service && window.charac.service.device && window.charac.service.device.gatt.connected) {
+          console.log('Already connected, showing dashboard');
+          window.updateConnectionStatus(true);
+        }
+      }, 1000);
+    });
+
+    // Listen for successful connections
+    window.addEventListener('bleConnected', function() {
+      console.log('BLE Connected event received');
+      window.updateConnectionStatus(true);
+    });
+
+    window.addEventListener('bleDisconnected', function() {
+      console.log('BLE Disconnected event received');
+      window.updateConnectionStatus(false);
+    });
   </script>
 </body>
 </html>
