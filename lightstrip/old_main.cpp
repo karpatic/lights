@@ -20,6 +20,9 @@
 
 #include <NeoPixelBus.h>               // RMT‑based LED driver
 
+// ───────── Forward declarations ─────────
+String generateStatusJson();
+
 // ───────── BLE definitions ─────────
 #define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c3319123"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b2623"
@@ -47,11 +50,11 @@ typedef struct __attribute__((packed)) {
   float    c;
   bool     d;
   uint8_t  brightness;        // 0–255
-  char     lightmode[32];
-  char     colortwo[16];
-  char     colorthree[16];
-  char     colorone[16];
-  uint16_t animationdelay;     // ms
+  char     lightMode[32];
+  char     colorTwo[16];
+  char     colorThree[16];
+  char     colorOne[16];
+  uint16_t loopInterval;     // ms
   uint16_t ledCount;           // strip length
   uint8_t  pixelPin;           // GPIO
   uint16_t maxCurrent;         // mA supply limit
@@ -64,11 +67,11 @@ static strip_state_t myData = {
   420.69f,         // c
   true,            // d
   40,              // brightness (≈15 %)
-  "setColor",     // lightmode
-  "0,255,0",      // colortwo
-  "0,0,255",      // colorthree
-  "255,0,0",      // colorone
-  120,             // animationdelay
+  "setColor",     // lightMode
+  "0,255,0",      // colorTwo
+  "0,0,255",      // colorThree
+  "255,0,0",      // colorOne
+  120,             // loopInterval
   DEFAULT_LED_COUNT,
   DEFAULT_PIN,
   DEFAULT_MAX_CURRENT
@@ -81,9 +84,9 @@ inline uint32_t rgbToPacked(uint8_t r, uint8_t g, uint8_t b) {
   return ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;
 }
 
-uint32_t colorone = rgbToPacked(255, 0, 0);
-uint32_t colortwo = rgbToPacked(0, 255, 0);
-uint32_t colorthree = rgbToPacked(0, 0, 255);
+uint32_t colorOne = rgbToPacked(255, 0, 0);
+uint32_t colorTwo = rgbToPacked(0, 255, 0);
+uint32_t colorThree = rgbToPacked(0, 0, 255);
 
 void initStrip() {
   if (strip) {
@@ -114,13 +117,13 @@ void applyBrightnessLimit() {
 }
 
 void setColor() {
-  strip->ClearTo(colorone);
+  strip->ClearTo(colorOne);
   strip->Show();
 }
 
 void swipe() {
   static uint16_t pixel = 0;
-  strip->SetPixelColor(pixel, colorone);
+  strip->SetPixelColor(pixel, colorOne);
   strip->Show();
   pixel = (pixel + 1) % myData.ledCount;
 }
@@ -158,7 +161,7 @@ void theaterChaseRainbow() {
 void theaterChase() {
   static uint8_t q = 0;
   for (uint16_t i = 0; i < myData.ledCount; i += 3) {
-    strip->SetPixelColor(i + q, colorone);
+    strip->SetPixelColor(i + q, colorOne);
   }
   strip->Show();
   for (uint16_t i = 0; i < myData.ledCount; i += 3) {
@@ -177,12 +180,12 @@ void swipeRandom() {
 
 void handleStrip() {
   if (!strip) return;
-  if      (strcmp(myData.lightmode, "setColor") == 0)            setColor();
-  else if (strcmp(myData.lightmode, "swipe") == 0)                swipe();
-  else if (strcmp(myData.lightmode, "rainbowCycle") == 0)        rainbowCycle();
-  else if (strcmp(myData.lightmode, "rainbow") == 0)             rainbow();
-  else if (strcmp(myData.lightmode, "theaterChaseRainbow") == 0) theaterChaseRainbow();
-  else if (strcmp(myData.lightmode, "theaterChase") == 0)        theaterChase();
+  if      (strcmp(myData.lightMode, "setColor") == 0)            setColor();
+  else if (strcmp(myData.lightMode, "swipe") == 0)                swipe();
+  else if (strcmp(myData.lightMode, "rainbowCycle") == 0)        rainbowCycle();
+  else if (strcmp(myData.lightMode, "rainbow") == 0)             rainbow();
+  else if (strcmp(myData.lightMode, "theaterChaseRainbow") == 0) theaterChaseRainbow();
+  else if (strcmp(myData.lightMode, "theaterChase") == 0)        theaterChase();
   else                                                           swipeRandom();
 }
 
@@ -262,12 +265,12 @@ void parseAndUpdateData(const std::string& jsonString) {
   bool geometryChanged = false;
 
   if (doc.containsKey("brightness"))   myData.brightness = doc["brightness"].as<uint8_t>();
-  if (doc.containsKey("animationdelay")) myData.animationdelay = doc["animationdelay"].as<uint16_t>();
-  if (doc.containsKey("lightmode"))    strlcpy(myData.lightmode, doc["lightmode"], sizeof(myData.lightmode));
+  if (doc.containsKey("loopInterval")) myData.loopInterval = doc["loopInterval"].as<uint16_t>();
+  if (doc.containsKey("lightMode"))    strlcpy(myData.lightMode, doc["lightMode"], sizeof(myData.lightMode));
 
-  if (doc.containsKey("colorone"))  { strlcpy(myData.colorone, doc["colorone"], sizeof(myData.colorone)); updateStripColor(myData.colorone, &colorone); }
-  if (doc.containsKey("colortwo"))  { strlcpy(myData.colortwo, doc["colortwo"], sizeof(myData.colortwo)); updateStripColor(myData.colortwo, &colortwo); }
-  if (doc.containsKey("colorthree")){ strlcpy(myData.colorthree, doc["colorthree"], sizeof(myData.colorthree)); updateStripColor(myData.colorthree, &colorthree); }
+  if (doc.containsKey("colorOne"))  { strlcpy(myData.colorOne, doc["colorOne"], sizeof(myData.colorOne)); updateStripColor(myData.colorOne, &colorOne); }
+  if (doc.containsKey("colorTwo"))  { strlcpy(myData.colorTwo, doc["colorTwo"], sizeof(myData.colorTwo)); updateStripColor(myData.colorTwo, &colorTwo); }
+  if (doc.containsKey("colorThree")){ strlcpy(myData.colorThree, doc["colorThree"], sizeof(myData.colorThree)); updateStripColor(myData.colorThree, &colorThree); }
 
   if (doc.containsKey("ledCount"))  { myData.ledCount = doc["ledCount"].as<uint16_t>(); geometryChanged = true; }
   if (doc.containsKey("pixelPin"))  { myData.pixelPin = doc["pixelPin"].as<uint8_t>(); geometryChanged = true; }
@@ -296,12 +299,12 @@ class BleEventCallbacks : public BLECharacteristicCallbacks {
 // ───────── Status JSON generator ─────────
 String generateStatusJson() {
   DynamicJsonDocument doc(512);
-  doc["mode"] = myData.lightmode;
+  doc["mode"] = myData.lightMode;
   doc["brightness"] = myData.brightness;
-  doc["animationdelay"] = myData.animationdelay;
-  doc["colorone"] = myData.colorone;
-  doc["colortwo"] = myData.colortwo;
-  doc["colorthree"] = myData.colorthree;
+  doc["loopInterval"] = myData.loopInterval;
+  doc["colorOne"] = myData.colorOne;
+  doc["colorTwo"] = myData.colorTwo;
+  doc["colorThree"] = myData.colorThree;
   doc["ledCount"] = myData.ledCount;
   doc["pixelPin"] = myData.pixelPin;
   doc["maxCurrent"] = myData.maxCurrent;
@@ -359,7 +362,7 @@ void setup() {
 void loop() {
   static uint32_t last = 0;
   uint32_t now = millis();
-  if (now - last >= myData.animationdelay) {
+  if (now - last >= myData.loopInterval) {
     last = now;
     handleStrip();
   }

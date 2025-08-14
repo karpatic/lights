@@ -8,11 +8,11 @@ window.processing = false;
 
 // Define data configuration with all supported keys
 window.myData = {
-  lightmode: 'swipe',
-  colorone: '255,0,203',
-  colortwo: '255,0,0',
-  colorthree: '0,0,255',
-  animationdelay: 100,
+  lightMode: 'swipe',
+  colorOne: '255,0,203',
+  colorTwo: '255,0,0',
+  colorThree: '0,0,255',
+  loopInterval: 100,
   brightness: 40,
   ledCount: 50,
   pixelPin: 15,
@@ -49,13 +49,13 @@ window.loadSettings = () => {
 
 window.updateUIFromData = () => {
   // Update color pickers
-  if (window.myData.colorone) updateColorPicker('colorOne', window.myData.colorone);
-  if (window.myData.colortwo) updateColorPicker('colorTwo', window.myData.colortwo);
-  if (window.myData.colorthree) updateColorPicker('colorThree', window.myData.colorthree);
+  if (window.myData.colorOne) updateColorPicker('colorOne', window.myData.colorOne);
+  if (window.myData.colorTwo) updateColorPicker('colorTwo', window.myData.colorTwo);
+  if (window.myData.colorThree) updateColorPicker('colorThree', window.myData.colorThree);
   
   // Update number inputs with correct ID mapping
   const inputMappings = {
-    'animationDelay': 'animationdelay',
+    'loopInterval': 'loopInterval',
     'brightness': 'brightness',
     'ledCount': 'ledCount',
     'pixelPin': 'pixelPin',
@@ -101,22 +101,22 @@ window.bleRead = async ({ target: { value } }) => {
     
     // Update UI elements if they exist
     if (statusData.mode) {
-      const modeSelect = document.getElementById('lightmode');
+      const modeSelect = document.getElementById('lightMode');
       if (modeSelect) modeSelect.value = statusData.mode;
     }
     if (statusData.brightness !== undefined) {
       const brightnessInput = document.getElementById('brightness');
       if (brightnessInput) brightnessInput.value = statusData.brightness;
     }
-    if (statusData.animationdelay !== undefined) {
-      const delayInput = document.getElementById('animationdelay');
-      if (delayInput) delayInput.value = statusData.animationdelay;
+    if (statusData.loopInterval !== undefined) {
+      const delayInput = document.getElementById('loopInterval');
+      if (delayInput) delayInput.value = statusData.loopInterval;
     }
     
     // Update color pickers if they exist
-    if (statusData.colorone) updateColorPicker('colorOne', statusData.colorone);
-    if (statusData.colortwo) updateColorPicker('colorTwo', statusData.colortwo);
-    if (statusData.colorthree) updateColorPicker('colorThree', statusData.colorthree);
+    if (statusData.colorOne) updateColorPicker('colorOne', statusData.colorOne);
+    if (statusData.colorTwo) updateColorPicker('colorTwo', statusData.colorTwo);
+    if (statusData.colorThree) updateColorPicker('colorThree', statusData.colorThree);
     
     // Log system info
     if (statusData.temperature) console.log('ESP32 Temperature:', statusData.temperature);
@@ -242,9 +242,9 @@ function updateColor() {
   
   // Map UI element IDs to data keys
   const colorMap = {
-    'colorOne': 'colorone',
-    'colorTwo': 'colortwo', 
-    'colorThree': 'colorthree'
+    'colorOne': 'colorOne',
+    'colorTwo': 'colorTwo', 
+    'colorThree': 'colorThree'
   };
   
   const dataKey = colorMap[this.id];
@@ -301,16 +301,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Color pickers are now handled by manual listeners in HTML
   
   // Animation delay control - fix the ID
-  const animationDelay = document.getElementById('animationDelay');
-  if (animationDelay) {
-    animationDelay.addEventListener('input', function() {
+  const loopInterval = document.getElementById('loopInterval');
+  if (loopInterval) {
+    loopInterval.addEventListener('input', function() {
       console.log('Animation delay changed to:', this.value);
-      window.myData.animationdelay = parseInt(this.value);
+      window.myData.loopInterval = parseInt(this.value);
       debouncedBleWrite();
     });
-    console.log('Added listener for animationDelay');
+    console.log('Added listener for loopInterval');
   } else {
-    console.warn('animationDelay element not found');
+    console.warn('loopInterval element not found');
   }
 
   // Brightness control
@@ -370,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
     colorOne: !!document.getElementById('colorOne'),
     colorTwo: !!document.getElementById('colorTwo'),
     colorThree: !!document.getElementById('colorThree'),
-    animationDelay: !!document.getElementById('animationDelay'),
+    loopInterval: !!document.getElementById('loopInterval'),
     brightness: !!document.getElementById('brightness'),
     ledCount: !!document.getElementById('ledCount'),
     pixelPin: !!document.getElementById('pixelPin'),
