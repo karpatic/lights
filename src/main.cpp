@@ -15,7 +15,7 @@ void show();
 
 struct_message myData = {
     20,           // brightness (of 100)
-    "color",      // lightMode
+    "static",      // lightMode
     0xFF0000,     // colorOne (red)
     0x00FF00,     // colorTwo (green)
     0x0000FF,     // colorThree (blue)

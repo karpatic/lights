@@ -110,3 +110,10 @@ chrome://flags/ -> Enable BT
 ### 8. **Additional Utility Functions**:
    - Generate random or noise-based patterns for dynamic lighting effects
    - Combine multiple lighting patterns or effects for complex designs
+
+
+### For Dev
+
+- Snap is bad. causes errors
+- pio run --target upload
+- chrome://flags enable bluetooth
