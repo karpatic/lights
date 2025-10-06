@@ -7,3 +7,5 @@ venv/
 .vscode/launch.json
 .vscode/ipch
 .vscode/* 
+*.pem
+.ssl/
