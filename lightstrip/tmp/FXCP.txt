@@ -1,75 +1,66 @@
 Nice effects to reproduce.
 List of effects: https://kno.wled.ge/features/effects/
 Their Code: https://github.com/wled/WLED/blob/main/wled00/FX.cpp#L4254
+ 
+## EFFECTS
 
-🎨 = Supports a color pallete
-1 12 or 123 = Use color 1, 2, 3 (if not using the palette)
-BG = Effect can be superimposed atop another effect (Overlayed on background strip data (all off or another effect))
+| Function Name         | Parameters                                          | Description                                                                                    |
+|-----------------------|-----------------------------------------------------|------------------------------------------------------------------------------------------------|
+| effect_static         | C                                                   | Sets all LEDs to the specified color                                                           |
+| effect_blink          | BG, blinkInterval                                   | Blinks between source and background data at the given interval                                |
+| effect_fade           | intensity                                           | Fades the LED data by the given intensity                                                      |
+| effect_range          | startPixel, endPixel, fadeIntensity                 | Applies fade to a range of pixels from startPixel to endPixel                                  |
+| effect_shift          | direction                                           | Shifts the LED data in the specified direction                                                 |
+| effect_swipe          | direction, C, overridePixelIndex                    | Lights pixels one at a time along a strip, optionally overriding a pixel index                 |
+| effect_sweep          | direction, C, dragLength, count, overridePixelIndex | Moves groups of LEDs across the strip with drag and count, optionally overriding a pixel index |
+| effect_breath         | intensity                                           | Fades between colors to create a breathing effect                                              |
 
-STATIC
+## Light Modes
 
-|x| Name              | Other Parameters              | Child Function | Description                                                                                                                           |
-|--| ---------------- | ----------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-|x| Percent           | colorOne, colorTwo, Intensity |                | Lights up a percentage of segment                                                                                                     |
-|x| Static            | colorOne                      |                | Sets all LEDs to the primary color                                                                                                    | 
-|x| Tri Color         | colorOne, colorTwo, colorThree|                | Solid Pattern with three colors                                                                                                       | 
-
-
-DYNAMIC
-
-|x| Name              | Other Parameters              | Child Function | Description                                                                                                                           |
-|--| ---------------- | ----------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-|x| Sunrise           | Time [min], Width             |                | Simulates a gradual sunrise or sunset. Speed sets: 0 – static sun; 1–60 min sunrise; 60–120 min sunset; >120 “breathing” rise and set |
-|x| Aurora            | Speed, Intensity              |                | Simulation of the Aurora Borealis                                                                                                     |
-|x| Pacifica          | Speed, Angle                  |                | Gentle ocean waves                                                                                                                    | 
-|x| Colorloop         | Speed, Intensity              |                | Cycle all LEDs through the rainbow colors                                                                                             | 
-
-INHERITED
-
-|x| Blink             | loopInterval                  | effect_blink   | Blinks between the primary color and off                                                                                              |
-|x| Blink Toggle      | loopInterval                  | effect_blink   | Blinks between primary and secondary colors                                                                                           |
-|x| Blink Random      | loopInterval                  | effect_blink   | Blinks random colors                                                                                                                  |
-
-|x| Swipe             | direction                     | effect_swipe   | Lights pixels one at a time along a strip, alternating between primary and secondary colors                                           |
-
-|x| Sweep             | direction                     | effect_sweep   | Moves n groups of y LEDs across the strip (all others off)                                                                            | 
-| | Sinelon Dual      | Speed, Trail                  | effect_sweep   | Sinelon from both directions                                                                                                          |
-
-|x| Theater Rainbow   | Speed, Gap size               | effect_sweep   | Same as Theater but uses colors of the rainbow                                                                                        |
-|x| Swipe Random      | direction                     | effect_sweep   | Lights pixels one at a time along a strip and using random colors.                                                                    |
-
-| | Stream            | Speed, Zone size              |                | Flush bands random hues along the string                                                                                              |
-| | Palette           | Cycle speed                   |                | Running color palette                                                                                                                 |
-| | Juggle            | Speed, Trail                  |                | Eight colored dots running, leaving trails                                                                                            |
-| | Bouncing Balls    | Gravity, # of balls           |                | Bouncing ball effect                                                                                                                  |
-| | Meteor            | Speed, Trail length           |                | The primary color creates a trail of randomly decaying color                                                                          | 
-| | Tetrix            | Speed, Width, One color       |                | Falling blocks stack                                                                                                                  |
-
-| | Sparkle           | Speed                         |  twinkle       | Single random LEDs light up in the primary color for a short time; secondary is background                                            |
-| | Fairy             | Speed, # of flashers          |  twinkle       | Inspired by twinkle-style Christmas lights                                                                                            |
-| | Fairytwinkle      | Speed, Intensity              |  twinkle       | Like Colortwinkle, but starting from all lit                                                                                          |
-| | Colortwinkles     | Fade speed, Spawn speed       |  twinkle       | LEDs light up randomly in random colors and fade off again                                                                            |
-| | Twinklefox        | Speed, Twinkle rate           |  twinkle       | FastLED gentle twinkling with slow fade in/out                                                                                        | 
-
-|x| Candle            | Speed, Intensity              |                | Flicker resembling a candle flame                                                                                                     | 
-
-|x| Heartbeat         | Speed, Intensity              |  Fade          | LED strip pulsing rhythm similar to a heartbeat         
-|x| Breathe           | Speed                         |  Fade          | Fades between primary and secondary color                                                                                             |
-| | Side Breathe      |                               |                | Selects every n pixels to blend sideways 
-
-| | Bezier on bounce / sweep
-
-|x| Shift             | direction                     |  Shift         | Shifts the existing strip over    
-|x| Washing Machine   | Speed, Intensity              |  Shift         | Spins, slows, reverses directions                                                                                                     |
-
-| | Plasma            | Phase, Intensity              |                | Plasma lamp                                                                                                                           |
-| | Perlin Move       | Speed, # of pixels, Fade rate |                | Using Perlin Noise for movement                                                                                                       |
+🎨 = Supports color palette, rainbow, or randoms.
+C1/C2/C3 = Uses color 1, 2, 3  
+🪟 = Overlay  - writes atop an existing strips data  
+🔧 = Modifier - modifies the brightness or indices of an existing strips data  
+🧱 = Base Layer - can only be used as a foundation for other modes, not as an overlay or modifier
 
 
-// ColorWavesWithPalettes by Mark Kriegsman: https://gist.github.com/kriegsman/8281905786e8b2632aeb
-// This function draws color waves with an ever-changing,
-// widely-varying set of parameters, using a color palette.
-uint16_t mode_colorwaves() {
-  return mode_colorwaves_pride_base(false);
-}
-static const char _data_FX_MODE_COLORWAVES[] PROGMEM = "Colorwaves@!,Hue;!;!;;pal=26";
+| x | Name            | Params                                 | Icons        | Description                                   | Effect |
+|---|-----------------|----------------------------------------|--------------|-----------------------------------------------|--------|
+| x | Static          | C1                                     | 🧱           | Sets all LEDs to the primary color            |static|
+| x | Tri Color       | C1, C2, C3                             | 🧱           | Solid pattern with three colors               |static,fade,range|  
+|   | Stream          | Speed, Zone size                       | 🧱           | Bands of random hues along the string         |shift|
+|   | Palette         | 🎨, Cycle speed                        | 🧱           | Running color palette/rainbow/random          |shift|
+|   | Plasma          | Phase, Intensity                       | 🧱           | Plasma lamp effect                            ||
+|   | Perlin Move     | Speed, # of pixels, Fade rate          | 🧱           | Perlin Noise movement                         ||
+| x | Sunrise         | 🎨, Time[min], Width                   | 🧱           | Simulates gradual sunrise/sunset              ||
+| x | Aurora          | 🎨, Speed, Intensity                   | 🧱           | Aurora Borealis simulation                    ||
+| x | Pacifica        | 🎨, Speed, Angle                       | 🧱           | Gentle ocean waves                            ||
+| x | Percent         | 🎨, C1, C2, Intensity                  | 🔧           | Lights up a percentage of segment             |static,range|
+| x | Blink           | 🎨, loopInterval                       | 🔧           | Blinks between primary color and off          |blink|
+| x | Breathe         | Speed                                  | 🔧           | Fades between primary and secondary color     |blink|
+| x | Heartbeat       | Speed, Intensity                       | 🔧           | Pulsing rhythm like a heartbeat               |fade| 
+| x | Twinkles        | 🎨, Fade, Spawn, Intensity             | 🔧           | colors fade in/out                            |fade|
+| x | Shift           | Speed, Intensity                       | 🔧           | Shifts pixels in a direction                  |shift|
+| x | Washing Machine | Speed, Intensity                       | 🔧           | Spins, slows, reverses directions             |shift|
+| x | Swipe           | 🎨, C1, direction                      | 🪟           | Lights pixels one at a time                   |swipe|
+| x | Sweep           | direction                              | 🪟           | Moves groups of LEDs across the strip         |sweep|
+| x | Sinelon Dual    | Speed, Trail                           | 🪟           | Sinelon from both directions                  |sweep|
+| x | Theater         | Speed, Gap size                        | 🪟           | Theater effect with rainbow colors            |sweep|
+| x | Candle          | Speed, Intensity                       | 🪟           | Flicker resembling a candle flame             ||
+|   | Fireworks       | 🎨, Speed, Intensity                   | 🪟           | A pixel shoots towards fwd then explodes      ||
+|   | Juggle          | Speed, Trail                           | 🪟           | Colored dots running, leaving trails          ||
+|   | Bouncing Balls  | Gravity, # of balls                    | 🪟           | Bouncing ball effect                          ||
+|   | Meteor          | Speed, Trail length                    | 🪟           | Trail of randomly decaying color              ||
+|   | Tetrix          | Speed, Width, One color                | 🪟           | Falling blocks stack                          ||
+ 
+
+Improvements: 
+- Shift amount, merge Blink and Breathe vs Fade, swipe merge w sweep using persist(overridePixelIndex)
+- effect_blend - Selects every n pixels to blend sideways
+- Perlin / random selected indices for bleaching and such
+- Segmenting
+- Bezier/ sigmoid for all speed intensity fade etc.
+
+> Juggle, Bouncing Balls, Meteor, Tetrix can use a common underlying function that animates moving objects (dots, balls, blocks) w (position, speed, trail, and color). 
+> Plasma and Perlin Move can share a noise-based rendering function with different parameters. 
+> Stream and Palette are more pattern-based, but could use a shared function for color cycling or zone-based coloring.
