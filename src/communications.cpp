@@ -17,7 +17,7 @@ uint8_t convertBrightness(int valu) {
   return (uint8_t)(valu * 2.55);  // Linear scale: 1=2.55, 50=127.5, 100=255
 }
 
-// Add function to clone struct data
+// Clone struct data
 void cloneData(const struct_message& source, struct_message& destination) {
   memcpy(&destination, &source, sizeof(struct_message));
 }
