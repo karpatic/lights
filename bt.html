@@ -52,7 +52,7 @@
         <div class="settings-grid">
           <div class="control-group">
             <label for="brightness">Brightness</label>
-            <input type="number" class="number-input" step="5" min="0" max="100" id="brightness" value="25"/>
+            <input type="number" class="number-input" step="5" min="0" max="100" id="brightness" value="20"/>
           </div>
           <div class="control-group">
             <label for="speed">Speed</label>
@@ -80,8 +80,18 @@
         <div class="control-group" style="margin-top: 12px;">
           <label for="animationMode">Animation Mode</label>
           <select class="number-input" id="animationMode">
+            <!-- Base Layer Modes -->
             <option value="static" selected>Solid Color</option>
             <option value="statictri">Static Tri-Color</option>
+            <option value="perlinmove">Perlin Move</option>
+            <option value="stream">Stream</option>
+            <option value="palette">Palette</option>
+            <option value="plasma">Plasma</option>
+            <option value="pacifica">Pacifica</option>
+            <option value="sunrise">Sunrise</option>
+            <option value="aurora">Aurora</option>
+            
+            <!-- Modifier Layer Modes -->
             <option value="percent">Percentage Display</option>
             <option value="percenttri">Percentage Tri-Color</option>
             <option value="shift">Color Shift</option>
@@ -89,15 +99,22 @@
             <option value="blink">Blink</option>
             <option value="blinktoggle">Blink Toggle</option>
             <option value="blinkrandom">Blink Random</option>
+            <option value="heartbeat">Heartbeat</option>
+            <option value="twinkles">Twinkles</option>
+            
+            <!-- Overlay Modes -->
             <option value="swipe">Color Swipe</option>
             <option value="swiperandom">Random Swipe</option>
             <option value="colorloop">Color Loop</option>
             <option value="breath">Breath</option>
             <option value="sweep">Color Sweep</option>
             <option value="sweepdual">Dual Color Sweep</option>
-            <option value="pacifica">Pacifica</option>
-            <option value="sunrise">Sunrise</option>
-            <option value="aurora">Aurora</option>
+            <option value="theater">Theater</option>
+            <option value="fireworks">Fireworks</option>
+            <option value="juggle">Juggle</option>
+            <option value="bouncingballs">Bouncing Balls</option>
+            <option value="meteor">Meteor</option>
+            <option value="tetrix">Tetrix</option>
             <option value="candle">Candle</option>
           </select>
         </div>
@@ -112,7 +129,7 @@
         <div class="settings-grid">
           <div class="control-group">
             <label for="ledCount">LED Count</label>
-            <input type="number" class="number-input" min="5" max="400" step="5" id="ledCount" value="50"/>
+            <input type="number" class="number-input" min="5" max="400" step="5" id="ledCount" value="300"/>
           </div>
           <div class="control-group">
             <label for="pixelPin">Pixel Pin</label>
@@ -145,18 +162,18 @@
     
     // Default values object
     const DEFAULT_VALUES = {
-      colorOne: '255,0,203',
-      colorTwo: '255,0,0', 
-      colorThree: '0,0,255',
-      brightness: 25,
+      colorOne: 0xFF00CB,    // Hot pink as hex
+      colorTwo: 0xFF0000,    // Red as hex
+      colorThree: 0x0000FF,  // Blue as hex
+      brightness: 20,        // Match main.cpp default
       speed: 50,
-      count: 75,
+      count: 2,              // Match main.cpp default  
       intensity: 75,
       direction: 0,
-      ledCount: 50,
+      ledCount: 300,         // Match main.cpp default
       pixelPin: 15,
       maxCurrent: 8000,
-      colorOrder: 'NEO_GRB',
+      colorOrder: 'NEO_GRB', // Match main.cpp default
       lightMode: 'static',
       updated: true
     };
@@ -208,13 +225,14 @@
       }
     }
 
-    // Convert RGB string to hex color
-    function rgbToHex(rgbString) {
-      const [r, g, b] = rgbString.split(',').map(Number);
-      return '#' + [r, g, b].map(x => {
-        const hex = x.toString(16);
-        return hex.length === 1 ? '0' + hex : hex;
-      }).join('');
+    // Convert hex integer to hex color string for input
+    function hexIntToColor(hexInt) {
+      return '#' + hexInt.toString(16).padStart(6, '0');
+    }
+
+    // Convert hex color string to hex integer
+    function colorToHexInt(colorString) {
+      return parseInt(colorString.slice(1), 16);
     }
 
     // Load values into UI elements
@@ -230,19 +248,19 @@
       Object.assign(window.myData, values, { updated: true });
       console.log('window.myData updated with stored values:', window.myData);
       
-      // Load color values
+      // Load color values - convert hex integers to color strings
       const colorOne = document.getElementById('colorOne');
       const colorTwo = document.getElementById('colorTwo');
       const colorThree = document.getElementById('colorThree');
       
-      if (colorOne && values.colorOne) {
-        colorOne.value = rgbToHex(values.colorOne);
+      if (colorOne && values.colorOne !== undefined) {
+        colorOne.value = hexIntToColor(values.colorOne);
       }
-      if (colorTwo && values.colorTwo) {
-        colorTwo.value = rgbToHex(values.colorTwo);
+      if (colorTwo && values.colorTwo !== undefined) {
+        colorTwo.value = hexIntToColor(values.colorTwo);
       }
-      if (colorThree && values.colorThree) {
-        colorThree.value = rgbToHex(values.colorThree);
+      if (colorThree && values.colorThree !== undefined) {
+        colorThree.value = hexIntToColor(values.colorThree);
       }
       
       // Load number values
@@ -305,11 +323,8 @@
           input.addEventListener('input', function() {
             console.log('Manual listener - Color input changed:', this.id, this.value);
             
-            // Extract RGB values
-            let color = this.value.slice(1);
-            let r = parseInt(color.substr(0, 2), 16);
-            let g = parseInt(color.substr(2, 2), 16);
-            let b = parseInt(color.substr(4, 2), 16);
+            // Convert color string to hex integer
+            const hexInt = colorToHexInt(this.value);
             
             // Map UI element IDs to data keys
             const colorMap = {
@@ -320,11 +335,13 @@
             
             const dataKey = colorMap[this.id];
             if (dataKey && window.myData) {
-              window.myData[dataKey] = `${r},${g},${b}`;
+              window.myData[dataKey] = hexInt;
               window.myData.updated = true;
-              console.log('Color updated:', dataKey, '=', window.myData[dataKey]);
+              console.log('Color updated:', dataKey, '=', hexInt, '(0x' + hexInt.toString(16) + ')');
               
-              // Save settings
+              // Save to localStorage
+              saveToLocalStorage();
+              
               if (window.saveSettings) window.saveSettings();
               
               // Write to BLE if connected
@@ -503,11 +520,8 @@
           input.addEventListener('input', function() {
             console.log('Manual listener - Color input changed:', this.id, this.value);
             
-            // Extract RGB values
-            let color = this.value.slice(1);
-            let r = parseInt(color.substr(0, 2), 16);
-            let g = parseInt(color.substr(2, 2), 16);
-            let b = parseInt(color.substr(4, 2), 16);
+            // Convert color string to hex integer
+            const hexInt = colorToHexInt(this.value);
             
             // Map UI element IDs to data keys
             const colorMap = {
@@ -518,9 +532,9 @@
             
             const dataKey = colorMap[this.id];
             if (dataKey && window.myData) {
-              window.myData[dataKey] = `${r},${g},${b}`;
+              window.myData[dataKey] = hexInt;
               window.myData.updated = true;
-              console.log('Color updated:', dataKey, '=', window.myData[dataKey]);
+              console.log('Color updated:', dataKey, '=', hexInt, '(0x' + hexInt.toString(16) + ')');
               
               // Save to localStorage
               saveToLocalStorage();
@@ -625,19 +639,15 @@
       colorInputs.forEach((input, index) => {
         if (input) {
           // Generate random color
-          const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+          const randomHexInt = Math.floor(Math.random() * 0xFFFFFF);
+          const randomColor = hexIntToColor(randomHexInt);
           input.value = randomColor;
           
           // Update myData
           if (window.myData) {
-            let color = randomColor.slice(1);
-            let r = parseInt(color.substr(0, 2), 16);
-            let g = parseInt(color.substr(2, 2), 16);
-            let b = parseInt(color.substr(4, 2), 16);
-            
-            window.myData[colorKeys[index]] = `${r},${g},${b}`;
+            window.myData[colorKeys[index]] = randomHexInt;
             window.myData.updated = true;
-            console.log('Random color generated:', colorKeys[index], '=', window.myData[colorKeys[index]]);
+            console.log('Random color generated:', colorKeys[index], '=', randomHexInt, '(0x' + randomHexInt.toString(16) + ')');
           }
         }
       });

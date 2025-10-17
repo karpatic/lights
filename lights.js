@@ -6,24 +6,79 @@ window.notificationsActive = false;
 window.queued = false;
 window.processing = false;
 
-// Define data configuration with all supported keys
+// Define data configuration with all supported keys  
 window.myData = {
-  lightMode: 'swipe',
-  colorOne: '255,0,203',
-  colorTwo: '255,0,0',
-  colorThree: '0,0,255',
-  loopInterval: 100,
-  brightness: 40,
-  ledCount: 50,
+  lightMode: 'static',  // Speed control  
+  const speed = document.getElementById('speed');
+  if (speed) {
+    speed.addEventListener('input', function() {
+      console.log('Speed changed to:', this.value);
+      window.myData.speed = parseInt(this.value);
+      window.myData.updated = true;
+      debouncedBleWrite();
+    });
+    console.log('Added listener for speed');
+  } else {
+    console.warn('speed element not found');
+  }
+
+  // Intensity control
+  const intensity = document.getElementById('intensity');
+  if (intensity) {
+    intensity.addEventListener('input', function() {
+      console.log('Intensity changed to:', this.value);
+      window.myData.intensity = parseInt(this.value);
+      window.myData.updated = true;
+      debouncedBleWrite();
+    });
+    console.log('Added listener for intensity');
+  } else {
+    console.warn('intensity element not found');
+  }
+
+  // Count control
+  const count = document.getElementById('count');
+  if (count) {
+    count.addEventListener('input', function() {
+      console.log('Count changed to:', this.value);
+      window.myData.count = parseInt(this.value);
+      window.myData.updated = true;
+      debouncedBleWrite();
+    });
+    console.log('Added listener for count');
+  } else {
+    console.warn('count element not found');
+  }
+
+  // Direction control
+  const direction = document.getElementById('direction');
+  if (direction) {
+    direction.addEventListener('input', function() {
+      console.log('Direction changed to:', this.value);
+      window.myData.direction = parseInt(this.value);
+      window.myData.updated = true;
+      debouncedBleWrite();
+    });
+    console.log('Added listener for direction');
+  } else {
+    console.warn('direction element not found');
+  }: 0xFF00CB,    // Hot pink as hex integer
+  colorTwo: 0xFF0000,    // Red as hex integer  
+  colorThree: 0x0000FF,  // Blue as hex integer
+  brightness: 20,        // Match main.cpp default
+  speed: 50,
+  intensity: 75,
+  count: 2,              // Match main.cpp default
+  direction: 0,
+  ledCount: 300,         // Match main.cpp default
   pixelPin: 15,
-  maxCurrent: 8000
+  maxCurrent: 8000,
+  colorOrder: 'NEO_GRB', // Match main.cpp default
+  updated: true
 };
 
 window.getRandomColor = () => {
-  const r = Math.floor(Math.random() * 256);
-  const g = Math.floor(Math.random() * 256);
-  const b = Math.floor(Math.random() * 256);
-  return `${r},${g},${b}`;
+  return Math.floor(Math.random() * 0xFFFFFF);
 }
 
 // Local storage functions
@@ -48,21 +103,37 @@ window.loadSettings = () => {
 };
 
 window.updateUIFromData = () => {
-  // Update color pickers
-  if (window.myData.colorOne) updateColorPicker('colorOne', window.myData.colorOne);
-  if (window.myData.colorTwo) updateColorPicker('colorTwo', window.myData.colorTwo);
-  if (window.myData.colorThree) updateColorPicker('colorThree', window.myData.colorThree);
+  // Update color pickers - now expecting hex integers
+  if (window.myData.colorOne !== undefined) updateColorPicker('colorOne', window.myData.colorOne);
+  if (window.myData.colorTwo !== undefined) updateColorPicker('colorTwo', window.myData.colorTwo);
+  if (window.myData.colorThree !== undefined) updateColorPicker('colorThree', window.myData.colorThree);
   
   // Update number inputs with correct ID mapping
   const inputMappings = {
-    'loopInterval': 'loopInterval',
     'brightness': 'brightness',
+    'speed': 'speed',
+    'intensity': 'intensity', 
+    'count': 'count',
+    'direction': 'direction',
     'ledCount': 'ledCount',
     'pixelPin': 'pixelPin',
     'maxCurrent': 'maxCurrent'
   };
   
   Object.entries(inputMappings).forEach(([elementId, dataKey]) => {
+    const element = document.getElementById(elementId);
+    if (element && window.myData[dataKey] !== undefined) {
+      element.value = window.myData[dataKey];
+    }
+  });
+
+  // Update select inputs
+  const selectMappings = {
+    'animationMode': 'lightMode',
+    'colorOrder': 'colorOrder'
+  };
+  
+  Object.entries(selectMappings).forEach(([elementId, dataKey]) => {
     const element = document.getElementById(elementId);
     if (element && window.myData[dataKey] !== undefined) {
       element.value = window.myData[dataKey];
@@ -100,23 +171,51 @@ window.bleRead = async ({ target: { value } }) => {
     console.log('Status from BLE:', statusData);
     
     // Update UI elements if they exist
-    if (statusData.mode) {
-      const modeSelect = document.getElementById('lightMode');
-      if (modeSelect) modeSelect.value = statusData.mode;
+    if (statusData.lightMode) {
+      const modeSelect = document.getElementById('animationMode');
+      if (modeSelect) modeSelect.value = statusData.lightMode;
     }
     if (statusData.brightness !== undefined) {
       const brightnessInput = document.getElementById('brightness');
       if (brightnessInput) brightnessInput.value = statusData.brightness;
     }
-    if (statusData.loopInterval !== undefined) {
-      const delayInput = document.getElementById('loopInterval');
-      if (delayInput) delayInput.value = statusData.loopInterval;
+    if (statusData.speed !== undefined) {
+      const speedInput = document.getElementById('speed');
+      if (speedInput) speedInput.value = statusData.speed;
+    }
+    if (statusData.intensity !== undefined) {
+      const intensityInput = document.getElementById('intensity');
+      if (intensityInput) intensityInput.value = statusData.intensity;
+    }
+    if (statusData.count !== undefined) {
+      const countInput = document.getElementById('count');
+      if (countInput) countInput.value = statusData.count;
+    }
+    if (statusData.direction !== undefined) {
+      const directionSelect = document.getElementById('direction');
+      if (directionSelect) directionSelect.value = statusData.direction;
+    }
+    if (statusData.ledCount !== undefined) {
+      const ledCountInput = document.getElementById('ledCount');
+      if (ledCountInput) ledCountInput.value = statusData.ledCount;
+    }
+    if (statusData.pixelPin !== undefined) {
+      const pixelPinInput = document.getElementById('pixelPin');
+      if (pixelPinInput) pixelPinInput.value = statusData.pixelPin;
+    }
+    if (statusData.maxCurrent !== undefined) {
+      const maxCurrentInput = document.getElementById('maxCurrent');
+      if (maxCurrentInput) maxCurrentInput.value = statusData.maxCurrent;
+    }
+    if (statusData.colorOrder) {
+      const colorOrderSelect = document.getElementById('colorOrder');
+      if (colorOrderSelect) colorOrderSelect.value = statusData.colorOrder;
     }
     
-    // Update color pickers if they exist
-    if (statusData.colorOne) updateColorPicker('colorOne', statusData.colorOne);
-    if (statusData.colorTwo) updateColorPicker('colorTwo', statusData.colorTwo);
-    if (statusData.colorThree) updateColorPicker('colorThree', statusData.colorThree);
+    // Update color pickers - now expecting hex integers
+    if (statusData.colorOne !== undefined) updateColorPicker('colorOne', statusData.colorOne);
+    if (statusData.colorTwo !== undefined) updateColorPicker('colorTwo', statusData.colorTwo);
+    if (statusData.colorThree !== undefined) updateColorPicker('colorThree', statusData.colorThree);
     
     // Log system info
     if (statusData.temperature) console.log('ESP32 Temperature:', statusData.temperature);
@@ -128,10 +227,9 @@ window.bleRead = async ({ target: { value } }) => {
   }
 };
 
-// Helper function to update color picker from RGB string
-function updateColorPicker(elementId, rgbString) {
-  const [r, g, b] = rgbString.split(',').map(Number);
-  const hex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+// Helper function to convert hex integer to color picker format
+function updateColorPicker(elementId, hexInt) {
+  const hex = '#' + hexInt.toString(16).padStart(6, '0');
   const element = document.getElementById(elementId);
   if (element) element.value = hex;
 }
@@ -235,10 +333,8 @@ window.ble = async () => {
 // Function to update color settings
 function updateColor() {
   console.log('updateColor called on element:', this.id, 'with value:', this.value);
-  let color = this.value.slice(1);
-  let r = parseInt(color.substr(0, 2), 16);
-  let g = parseInt(color.substr(2, 2), 16);
-  let b = parseInt(color.substr(4, 2), 16);
+  // Convert color string to hex integer
+  const hexInt = parseInt(this.value.slice(1), 16);
   
   // Map UI element IDs to data keys
   const colorMap = {
@@ -249,8 +345,9 @@ function updateColor() {
   
   const dataKey = colorMap[this.id];
   if (dataKey) {
-    window.myData[dataKey] = `${r},${g},${b}`;
-    console.log('Color updated:', dataKey, '=', window.myData[dataKey]);
+    window.myData[dataKey] = hexInt;
+    window.myData.updated = true;
+    console.log('Color updated:', dataKey, '=', hexInt, '(0x' + hexInt.toString(16) + ')');
     // Save settings and write to BLE immediately
     window.saveSettings();
     if (window.charac && window.charac.service && window.charac.service.device && window.charac.service.device.gatt.connected) {
@@ -300,17 +397,88 @@ document.addEventListener('DOMContentLoaded', () => {
   // Skip color picker setup since it's handled in HTML
   // Color pickers are now handled by manual listeners in HTML
   
-  // Animation delay control - fix the ID
-  const loopInterval = document.getElementById('loopInterval');
-  if (loopInterval) {
-    loopInterval.addEventListener('input', function() {
-      console.log('Animation delay changed to:', this.value);
-      window.myData.loopInterval = parseInt(this.value);
+  // Animation mode control - replace the old loopInterval
+  const animationMode = document.getElementById('animationMode');
+  if (animationMode) {
+    animationMode.addEventListener('change', function() {
+      console.log('Animation mode changed to:', this.value);
+      window.myData.lightMode = this.value;
+      window.myData.updated = true;
       debouncedBleWrite();
     });
-    console.log('Added listener for loopInterval');
+    console.log('Added listener for animationMode');
   } else {
-    console.warn('loopInterval element not found');
+    console.warn('animationMode element not found');
+  }
+
+  // Speed control  
+  const speed = document.getElementById('speed');
+  if (speed) {
+    speed.addEventListener('input', function() {
+      console.log('Speed changed to:', this.value);
+      window.myData.speed = parseInt(this.value);
+      window.myData.updated = true;
+      debouncedBleWrite();
+    });
+    console.log('Added listener for speed');
+  } else {
+    console.warn('speed element not found');
+  }
+
+  // Intensity control
+  const intensity = document.getElementById('intensity');
+  if (intensity) {
+    intensity.addEventListener('input', function() {
+      console.log('Intensity changed to:', this.value);
+      window.myData.intensity = parseInt(this.value);
+      window.myData.updated = true;
+      debouncedBleWrite();
+    });
+    console.log('Added listener for intensity');
+  } else {
+    console.warn('intensity element not found');
+  }
+
+  // Count control
+  const count = document.getElementById('count');
+  if (count) {
+    count.addEventListener('input', function() {
+      console.log('Count changed to:', this.value);
+      window.myData.count = parseInt(this.value);
+      window.myData.updated = true;
+      debouncedBleWrite();
+    });
+    console.log('Added listener for count');
+  } else {
+    console.warn('count element not found');
+  }
+
+  // Direction control
+  const direction = document.getElementById('direction');
+  if (direction) {
+    direction.addEventListener('change', function() {
+      console.log('Direction changed to:', this.value);
+      window.myData.direction = parseInt(this.value);
+      window.myData.updated = true;
+      debouncedBleWrite();
+    });
+    console.log('Added listener for direction');
+  } else {
+    console.warn('direction element not found');
+  }
+
+  // Color order control
+  const colorOrder = document.getElementById('colorOrder');
+  if (colorOrder) {
+    colorOrder.addEventListener('change', function() {
+      console.log('Color order changed to:', this.value);
+      window.myData.colorOrder = this.value;
+      window.myData.updated = true;
+      debouncedBleWrite();
+    });
+    console.log('Added listener for colorOrder');
+  } else {
+    console.warn('colorOrder element not found');
   }
 
   // Brightness control
@@ -319,6 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
     brightness.addEventListener('input', function() {
       console.log('Brightness changed to:', this.value);
       window.myData.brightness = parseInt(this.value);
+      window.myData.updated = true;
       debouncedBleWrite();
     });
     console.log('Added listener for brightness');
@@ -332,6 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ledCount.addEventListener('input', function() {
       console.log('LED count changed to:', this.value);
       window.myData.ledCount = parseInt(this.value);
+      window.myData.updated = true;
       debouncedBleWrite();
     });
     console.log('Added listener for ledCount');
@@ -345,6 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pixelPin.addEventListener('input', function() {
       console.log('Pixel pin changed to:', this.value);
       window.myData.pixelPin = parseInt(this.value);
+      window.myData.updated = true;
       debouncedBleWrite();
     });
     console.log('Added listener for pixelPin');
@@ -358,6 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
     maxCurrent.addEventListener('input', function() {
       console.log('Max current changed to:', this.value);
       window.myData.maxCurrent = parseInt(this.value);
+      window.myData.updated = true;
       debouncedBleWrite();
     });
     console.log('Added listener for maxCurrent');
@@ -370,10 +542,22 @@ document.addEventListener('DOMContentLoaded', () => {
     colorOne: !!document.getElementById('colorOne'),
     colorTwo: !!document.getElementById('colorTwo'),
     colorThree: !!document.getElementById('colorThree'),
-    loopInterval: !!document.getElementById('loopInterval'),
+    speed: !!document.getElementById('speed'),
+    intensity: !!document.getElementById('intensity'),
+    count: !!document.getElementById('count'),
+    direction: !!document.getElementById('direction'),
     brightness: !!document.getElementById('brightness'),
     ledCount: !!document.getElementById('ledCount'),
     pixelPin: !!document.getElementById('pixelPin'),
-    maxCurrent: !!document.getElementById('maxCurrent')
+    maxCurrent: !!document.getElementById('maxCurrent'),
+    animationMode: !!document.getElementById('animationMode'),
+    colorOrder: !!document.getElementById('colorOrder')
   });
 });
+
+// Start connection monitoring
+setInterval(() => {
+  if (window.checkConnectionStatus) {
+    window.checkConnectionStatus();
+  }
+}, 1000);
