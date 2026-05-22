@@ -1,563 +1,550 @@
-//todo: handle: lights.js:66 Uncaught (in promise) DOMException: GATT operation failed for unknown reason.
+const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c3319123';
+const CHARACTERISTIC_UUID = 'beb5483e-36e1-4688-b7f5-ea07361b2623';
+const ESP_NAME = 'Music Strip';
+const STORAGE_KEYS = ['ledControllerDefaults', 'ledControllerSettings'];
+const LAST_DEVICE_ID_KEY = 'ledControllerLastDeviceId';
 
-// Initialize variables
-window.charac = false;
-window.notificationsActive = false;
-window.queued = false;
-window.processing = false;
-
-// Define data configuration with all supported keys  
-window.myData = {
-  lightMode: 'static',  // Speed control  
-  const speed = document.getElementById('speed');
-  if (speed) {
-    speed.addEventListener('input', function() {
-      console.log('Speed changed to:', this.value);
-      window.myData.speed = parseInt(this.value);
-      window.myData.updated = true;
-      debouncedBleWrite();
-    });
-    console.log('Added listener for speed');
-  } else {
-    console.warn('speed element not found');
-  }
-
-  // Intensity control
-  const intensity = document.getElementById('intensity');
-  if (intensity) {
-    intensity.addEventListener('input', function() {
-      console.log('Intensity changed to:', this.value);
-      window.myData.intensity = parseInt(this.value);
-      window.myData.updated = true;
-      debouncedBleWrite();
-    });
-    console.log('Added listener for intensity');
-  } else {
-    console.warn('intensity element not found');
-  }
-
-  // Count control
-  const count = document.getElementById('count');
-  if (count) {
-    count.addEventListener('input', function() {
-      console.log('Count changed to:', this.value);
-      window.myData.count = parseInt(this.value);
-      window.myData.updated = true;
-      debouncedBleWrite();
-    });
-    console.log('Added listener for count');
-  } else {
-    console.warn('count element not found');
-  }
-
-  // Direction control
-  const direction = document.getElementById('direction');
-  if (direction) {
-    direction.addEventListener('input', function() {
-      console.log('Direction changed to:', this.value);
-      window.myData.direction = parseInt(this.value);
-      window.myData.updated = true;
-      debouncedBleWrite();
-    });
-    console.log('Added listener for direction');
-  } else {
-    console.warn('direction element not found');
-  }: 0xFF00CB,    // Hot pink as hex integer
-  colorTwo: 0xFF0000,    // Red as hex integer  
-  colorThree: 0x0000FF,  // Blue as hex integer
-  brightness: 20,        // Match main.cpp default
+const DEFAULT_VALUES = {
+  colorOne: 0xff0000,
+  colorTwo: 0x00ff00,
+  colorThree: 0x0000ff,
+  brightness: 20,
   speed: 50,
   intensity: 75,
-  count: 2,              // Match main.cpp default
+  count: 2,
   direction: 0,
-  ledCount: 300,         // Match main.cpp default
+  ledCount: 300,
+  pixelCount: 300,
   pixelPin: 15,
   maxCurrent: 8000,
-  colorOrder: 'NEO_GRB', // Match main.cpp default
+  colorOrder: 'GRB',
+  lightMode: 'static',
   updated: true
 };
 
-window.getRandomColor = () => {
-  return Math.floor(Math.random() * 0xFFFFFF);
-}
-
-// Local storage functions
-window.saveSettings = () => {
-  localStorage.setItem('ledControllerSettings', JSON.stringify(window.myData));
-  console.log('Settings saved to local storage');
+const COLOR_FIELDS = ['colorOne', 'colorTwo', 'colorThree'];
+const NUMBER_FIELDS = ['brightness', 'speed', 'intensity', 'count', 'ledCount', 'pixelPin', 'maxCurrent'];
+const SELECT_FIELDS = ['animationMode', 'colorOrder', 'direction'];
+const COLOR_ORDERS = new Set(['RGB', 'RBG', 'GRB', 'GBR', 'BRG', 'BGR']);
+const FIELD_MAP = {
+  animationMode: 'lightMode',
+  colorOrder: 'colorOrder',
+  colorOne: 'colorOne',
+  colorTwo: 'colorTwo',
+  colorThree: 'colorThree',
+  brightness: 'brightness',
+  speed: 'speed',
+  intensity: 'intensity',
+  count: 'count',
+  direction: 'direction',
+  ledCount: 'ledCount',
+  pixelPin: 'pixelPin',
+  maxCurrent: 'maxCurrent'
 };
 
-window.loadSettings = () => {
-  const saved = localStorage.getItem('ledControllerSettings');
-  if (saved) {
+window.charac = window.charac || null;
+window.notificationsActive = window.notificationsActive || false;
+window.queued = window.queued || false;
+window.processing = window.processing || false;
+window.bleConnecting = window.bleConnecting || null;
+
+function clampNumber(value, fallback, min, max) {
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed)) {
+    return fallback;
+  }
+  return Math.min(max, Math.max(min, parsed));
+}
+
+function rgbStringToHexInt(value) {
+  const parts = String(value).split(',').map((part) => clampNumber(part.trim(), 0, 0, 255));
+  if (parts.length !== 3) {
+    return null;
+  }
+  return (parts[0] << 16) | (parts[1] << 8) | parts[2];
+}
+
+function normalizeColorValue(value, fallback = 0) {
+  if (typeof value === 'string') {
+    if (value.startsWith('#')) {
+      const parsed = Number.parseInt(value.slice(1), 16);
+      return Number.isNaN(parsed) ? fallback : parsed & 0xffffff;
+    }
+
+    if (value.includes(',')) {
+      const parsed = rgbStringToHexInt(value);
+      return parsed === null ? fallback : parsed;
+    }
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed & 0xffffff : fallback;
+}
+
+function colorToHexInt(colorString) {
+  return normalizeColorValue(colorString);
+}
+
+function hexIntToColor(value) {
+  return `#${normalizeColorValue(value).toString(16).padStart(6, '0')}`;
+}
+
+function hexIntToRgbString(value) {
+  const color = normalizeColorValue(value);
+  const red = (color >> 16) & 0xff;
+  const green = (color >> 8) & 0xff;
+  const blue = color & 0xff;
+  return `${red},${green},${blue}`;
+}
+
+function normalizeColorOrder(value) {
+  const order = String(value || DEFAULT_VALUES.colorOrder).replace(/^NEO_/, '').toUpperCase();
+  return COLOR_ORDERS.has(order) ? order : DEFAULT_VALUES.colorOrder;
+}
+
+function normalizeSettings(settings = {}) {
+  const hasPixelCount = settings.pixelCount !== undefined;
+  const normalized = { ...DEFAULT_VALUES, ...settings };
+
+  normalized.colorOne = normalizeColorValue(normalized.colorOne, DEFAULT_VALUES.colorOne);
+  normalized.colorTwo = normalizeColorValue(normalized.colorTwo, DEFAULT_VALUES.colorTwo);
+  normalized.colorThree = normalizeColorValue(normalized.colorThree, DEFAULT_VALUES.colorThree);
+  normalized.brightness = clampNumber(normalized.brightness, DEFAULT_VALUES.brightness, 0, 100);
+  normalized.speed = clampNumber(normalized.speed, DEFAULT_VALUES.speed, 0, 100);
+  normalized.intensity = clampNumber(normalized.intensity, DEFAULT_VALUES.intensity, 0, 100);
+  normalized.count = clampNumber(normalized.count, DEFAULT_VALUES.count, 0, 100);
+  normalized.direction = clampNumber(normalized.direction, DEFAULT_VALUES.direction, 0, 2);
+  normalized.ledCount = clampNumber(normalized.ledCount, DEFAULT_VALUES.ledCount, 1, 1000);
+  normalized.pixelCount = clampNumber(hasPixelCount ? normalized.pixelCount : normalized.ledCount, normalized.ledCount, 1, 1000);
+  normalized.pixelPin = clampNumber(normalized.pixelPin, DEFAULT_VALUES.pixelPin, 0, 48);
+  normalized.maxCurrent = clampNumber(normalized.maxCurrent, DEFAULT_VALUES.maxCurrent, 0, 50000);
+  normalized.colorOrder = normalizeColorOrder(normalized.colorOrder);
+  normalized.lightMode = normalized.lightMode || DEFAULT_VALUES.lightMode;
+  normalized.updated = true;
+
+  return normalized;
+}
+
+function buildEsp32Payload(data) {
+  const settings = normalizeSettings(data);
+
+  return {
+    brightness: settings.brightness,
+    lightMode: String(settings.lightMode).slice(0, 31),
+    colorOne: hexIntToRgbString(settings.colorOne),
+    colorTwo: hexIntToRgbString(settings.colorTwo),
+    colorThree: hexIntToRgbString(settings.colorThree),
+    ledCount: settings.ledCount,
+    colorOrder: settings.colorOrder,
+    maxCurrent: settings.maxCurrent,
+    pixelPin: settings.pixelPin,
+    pixelCount: settings.pixelCount,
+    speed: settings.speed,
+    intensity: settings.intensity,
+    count: settings.count,
+    direction: settings.direction
+  };
+}
+
+function mergeStoredSettings() {
+  const merged = {};
+
+  for (const storageKey of STORAGE_KEYS) {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) {
+      continue;
+    }
+
     try {
-      const settings = JSON.parse(saved);
-      window.myData = { ...window.myData, ...settings };
-      console.log('Settings loaded from local storage:', window.myData);
-      return true;
-    } catch (e) {
-      console.error('Failed to parse saved settings:', e);
+      Object.assign(merged, JSON.parse(raw));
+    } catch (error) {
+      console.error(`Failed to parse ${storageKey}:`, error);
     }
   }
-  return false;
-};
 
-window.updateUIFromData = () => {
-  // Update color pickers - now expecting hex integers
-  if (window.myData.colorOne !== undefined) updateColorPicker('colorOne', window.myData.colorOne);
-  if (window.myData.colorTwo !== undefined) updateColorPicker('colorTwo', window.myData.colorTwo);
-  if (window.myData.colorThree !== undefined) updateColorPicker('colorThree', window.myData.colorThree);
-  
-  // Update number inputs with correct ID mapping
-  const inputMappings = {
-    'brightness': 'brightness',
-    'speed': 'speed',
-    'intensity': 'intensity', 
-    'count': 'count',
-    'direction': 'direction',
-    'ledCount': 'ledCount',
-    'pixelPin': 'pixelPin',
-    'maxCurrent': 'maxCurrent'
-  };
-  
-  Object.entries(inputMappings).forEach(([elementId, dataKey]) => {
-    const element = document.getElementById(elementId);
-    if (element && window.myData[dataKey] !== undefined) {
-      element.value = window.myData[dataKey];
-    }
-  });
-
-  // Update select inputs
-  const selectMappings = {
-    'animationMode': 'lightMode',
-    'colorOrder': 'colorOrder'
-  };
-  
-  Object.entries(selectMappings).forEach(([elementId, dataKey]) => {
-    const element = document.getElementById(elementId);
-    if (element && window.myData[dataKey] !== undefined) {
-      element.value = window.myData[dataKey];
-    }
-  });
-};
-
-// Asynchronous function for Bluetooth write
-window.bleWrite = async () => {
-  if (window.processing) {
-    window.queued = true;
-  } else {
-    window.queued = false;
-    window.processing = true;
-    // Save settings to local storage before sending
-    window.saveSettings();
-    // json stringify and encode
-    const encoded = new TextEncoder().encode(JSON.stringify(window.myData));
-    console.log(`Ble Write`, window.myData, { encoded });
-    await window.charac.writeValue(encoded).then(() => {
-      window.processing = false;
-      window.queued && window.bleWrite();
-    }).catch(error => {
-      console.error('Error during BLE write:', error);
-      window.processing = false;
-    });
-  }
-};
-
-// Asynchronous function for Bluetooth read
-window.bleRead = async ({ target: { value } }) => {
-  let message = new TextDecoder().decode(await value);
-  try {
-    const statusData = JSON.parse(message);
-    console.log('Status from BLE:', statusData);
-    
-    // Update UI elements if they exist
-    if (statusData.lightMode) {
-      const modeSelect = document.getElementById('animationMode');
-      if (modeSelect) modeSelect.value = statusData.lightMode;
-    }
-    if (statusData.brightness !== undefined) {
-      const brightnessInput = document.getElementById('brightness');
-      if (brightnessInput) brightnessInput.value = statusData.brightness;
-    }
-    if (statusData.speed !== undefined) {
-      const speedInput = document.getElementById('speed');
-      if (speedInput) speedInput.value = statusData.speed;
-    }
-    if (statusData.intensity !== undefined) {
-      const intensityInput = document.getElementById('intensity');
-      if (intensityInput) intensityInput.value = statusData.intensity;
-    }
-    if (statusData.count !== undefined) {
-      const countInput = document.getElementById('count');
-      if (countInput) countInput.value = statusData.count;
-    }
-    if (statusData.direction !== undefined) {
-      const directionSelect = document.getElementById('direction');
-      if (directionSelect) directionSelect.value = statusData.direction;
-    }
-    if (statusData.ledCount !== undefined) {
-      const ledCountInput = document.getElementById('ledCount');
-      if (ledCountInput) ledCountInput.value = statusData.ledCount;
-    }
-    if (statusData.pixelPin !== undefined) {
-      const pixelPinInput = document.getElementById('pixelPin');
-      if (pixelPinInput) pixelPinInput.value = statusData.pixelPin;
-    }
-    if (statusData.maxCurrent !== undefined) {
-      const maxCurrentInput = document.getElementById('maxCurrent');
-      if (maxCurrentInput) maxCurrentInput.value = statusData.maxCurrent;
-    }
-    if (statusData.colorOrder) {
-      const colorOrderSelect = document.getElementById('colorOrder');
-      if (colorOrderSelect) colorOrderSelect.value = statusData.colorOrder;
-    }
-    
-    // Update color pickers - now expecting hex integers
-    if (statusData.colorOne !== undefined) updateColorPicker('colorOne', statusData.colorOne);
-    if (statusData.colorTwo !== undefined) updateColorPicker('colorTwo', statusData.colorTwo);
-    if (statusData.colorThree !== undefined) updateColorPicker('colorThree', statusData.colorThree);
-    
-    // Log system info
-    if (statusData.temperature) console.log('ESP32 Temperature:', statusData.temperature);
-    if (statusData.firmware) console.log('Firmware:', statusData.firmware);
-    if (statusData.freeHeap) console.log('Free Heap:', statusData.freeHeap);
-    
-  } catch (e) {
-    console.log('Non-JSON message from BLE:', message);
-  }
-};
-
-// Helper function to convert hex integer to color picker format
-function updateColorPicker(elementId, hexInt) {
-  const hex = '#' + hexInt.toString(16).padStart(6, '0');
-  const element = document.getElementById(elementId);
-  if (element) element.value = hex;
+  return normalizeSettings(merged);
 }
 
-// Function to set up Bluetooth connection
-window.ble = async () => {
+function persistSettings() {
+  const payload = JSON.stringify(window.myData);
+  for (const storageKey of STORAGE_KEYS) {
+    localStorage.setItem(storageKey, payload);
+  }
+}
+
+function connectedGatt() {
+  return window.charac?.service?.device?.gatt;
+}
+
+function isConnected() {
+  return Boolean(connectedGatt()?.connected);
+}
+
+function applyUIState(connected) {
   const dashboard = document.getElementById('btDash');
   const connectCard = document.getElementById('connectCard');
   const statusIndicator = document.getElementById('statusIndicator');
-  
-  console.log('BLE connection starting...', { dashboard, connectCard, statusIndicator });
-  
-  const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c3319123';
-  const CHARACTERISTIC_UUID = 'beb5483e-36e1-4688-b7f5-ea07361b2623';
-  const ESPNAME = 'Music Strip';
+  const connectButton = document.getElementById('btConnect');
 
-  if (window.charac && window.charac.service && window.charac.service.device && window.charac.service.device.gatt.connected) {
-    console.log('Already connected, showing dashboard');
-    // If we already have a valid connection, show the dashboard
-    if (dashboard) {
-      dashboard.classList.remove('hidden');
-      dashboard.style.display = 'grid';
-    }
-    if (connectCard) {
-      connectCard.classList.add('hidden');
-    }
-    if (statusIndicator) {
-      statusIndicator.classList.add('connected');
-    }
-    // Try to read to verify connection is working
-    try {
-      console.log('Read:', (await window.charac.readValue()).getUint8(0));
-    } catch (error) {
-      console.log('Connection seems broken, resetting...');
-      window.charac = false;
-      window.notificationsActive = false;
-      // Retry connection
-      return window.ble();
-    }
-  } else {
-    console.log("Setting up new connection!");
-    try {
-      const device = await navigator.bluetooth.requestDevice({
-        filters: [{ name: ESPNAME }],
-        optionalServices: [SERVICE_UUID]
-      });
-      const server = await device.gatt.connect();
-      const service = await server.getPrimaryService(SERVICE_UUID);
-      window.charac = await service.getCharacteristic(CHARACTERISTIC_UUID);
-      console.log('Characteristic obtained successfully');
-      
-      if (!window.notificationsActive) {
-        await window.charac.startNotifications();
-        window.notificationsActive = true;
-        window.charac.addEventListener('characteristicvaluechanged', window.bleRead);
-      }
-      
-      // Connection successful - update UI
-      if (dashboard) {
-        dashboard.classList.remove('hidden');
-        dashboard.style.display = 'grid';
-        console.log('Dashboard shown');
-      }
-      if (connectCard) {
-        connectCard.classList.add('hidden');
-        console.log('Connect card hidden');
-      }
-      if (statusIndicator) {
-        statusIndicator.classList.add('connected');
-        console.log('Status indicator updated');
-      }
-      
-      // Dispatch custom event for successful connection
-      window.dispatchEvent(new CustomEvent('bleConnected'));
-      
-      const testButton = document.querySelector('button[onclick*="TestEvent"]');
-      if (!testButton) {
-        document.getElementById('btConnect').insertAdjacentHTML('afterend',
-          "<button onclick=\"window.bleWrite('TestEvent')\">TestEvent</button>");
-      }
-          } catch (error) {
-      console.error('Bluetooth connection failed:', error);
-      
-      // Reset UI to initial state on connection failure
-      if (dashboard) {
-        dashboard.classList.add('hidden');
-      }
-      if (connectCard) {
-        connectCard.classList.remove('hidden');
-      }
-      if (statusIndicator) {
-        statusIndicator.classList.remove('connected');
-      }
-        // Dispatch custom event for failed connection
-      window.dispatchEvent(new CustomEvent('bleConnectionFailed', { detail: error }));
-      throw error;
-    }
+  if (dashboard) {
+    dashboard.classList.toggle('hidden', !connected);
+    dashboard.style.display = connected ? 'grid' : '';
+  }
+
+  if (connectCard) {
+    connectCard.classList.toggle('hidden', connected);
+  }
+
+  if (statusIndicator) {
+    statusIndicator.classList.toggle('connected', connected);
+  }
+
+  if (connectButton) {
+    connectButton.disabled = connected;
   }
 }
 
-// Function to update color settings
-function updateColor() {
-  console.log('updateColor called on element:', this.id, 'with value:', this.value);
-  // Convert color string to hex integer
-  const hexInt = parseInt(this.value.slice(1), 16);
-  
-  // Map UI element IDs to data keys
-  const colorMap = {
-    'colorOne': 'colorOne',
-    'colorTwo': 'colorTwo', 
-    'colorThree': 'colorThree'
-  };
-  
-  const dataKey = colorMap[this.id];
-  if (dataKey) {
-    window.myData[dataKey] = hexInt;
-    window.myData.updated = true;
-    console.log('Color updated:', dataKey, '=', hexInt, '(0x' + hexInt.toString(16) + ')');
-    // Save settings and write to BLE immediately
-    window.saveSettings();
-    if (window.charac && window.charac.service && window.charac.service.device && window.charac.service.device.gatt.connected) {
-      console.log('Writing color change to BLE...');
-      window.bleWrite();
-    } else {
-      console.log('BLE not connected, color saved locally only');
+function applyDataToUI() {
+  COLOR_FIELDS.forEach((field) => {
+    const element = document.getElementById(field);
+    if (element && window.myData[field] !== undefined) {
+      element.value = hexIntToColor(window.myData[field]);
     }
-  } else {
-    console.error('No data key found for element:', this.id);
+  });
+
+  NUMBER_FIELDS.forEach((field) => {
+    const element = document.getElementById(field);
+    if (element && window.myData[field] !== undefined) {
+      element.value = String(window.myData[field]);
+    }
+  });
+
+  const direction = document.getElementById('direction');
+  if (direction && window.myData.direction !== undefined) {
+    direction.value = String(window.myData.direction);
+  }
+
+  const animationMode = document.getElementById('animationMode');
+  if (animationMode && window.myData.lightMode !== undefined) {
+    animationMode.value = window.myData.lightMode;
+  }
+
+  const colorOrder = document.getElementById('colorOrder');
+  if (colorOrder && window.myData.colorOrder !== undefined) {
+    colorOrder.value = window.myData.colorOrder;
   }
 }
 
-// Debounce function to prevent excessive Bluetooth writes
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
+function updateData(fieldId, rawValue) {
+  const dataKey = FIELD_MAP[fieldId];
+  if (!dataKey) {
+    return;
+  }
 
-// Debounced version of bleWrite for number inputs
-const debouncedBleWrite = debounce(() => {
-  window.saveSettings();
-  if (window.charac && window.charac.service && window.charac.service.device && window.charac.service.device.gatt.connected) {
+  if (COLOR_FIELDS.includes(fieldId)) {
+    window.myData[dataKey] = colorToHexInt(rawValue);
+  } else if (NUMBER_FIELDS.includes(fieldId) || fieldId === 'direction') {
+    window.myData[dataKey] = Number.parseInt(rawValue, 10);
+  } else {
+    window.myData[dataKey] = rawValue;
+  }
+
+  if (dataKey === 'ledCount') {
+    window.myData.pixelCount = window.myData.ledCount;
+  }
+
+  window.myData.updated = true;
+  persistSettings();
+
+  if (isConnected()) {
     window.bleWrite();
   }
-}, 300);
+}
 
-// Add event listeners when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM Content Loaded - setting up event listeners');
-  
-  // Load settings from local storage first
-  window.loadSettings();
-  
-  // Update UI with loaded settings
-  setTimeout(() => {
-    window.updateUIFromData();
-  }, 100);
-
-  // Skip color picker setup since it's handled in HTML
-  // Color pickers are now handled by manual listeners in HTML
-  
-  // Animation mode control - replace the old loopInterval
-  const animationMode = document.getElementById('animationMode');
-  if (animationMode) {
-    animationMode.addEventListener('change', function() {
-      console.log('Animation mode changed to:', this.value);
-      window.myData.lightMode = this.value;
-      window.myData.updated = true;
-      debouncedBleWrite();
-    });
-    console.log('Added listener for animationMode');
-  } else {
-    console.warn('animationMode element not found');
+function bindElement(id, eventName) {
+  const element = document.getElementById(id);
+  if (!element || element.dataset.lightsBound === 'true') {
+    return;
   }
 
-  // Speed control  
-  const speed = document.getElementById('speed');
-  if (speed) {
-    speed.addEventListener('input', function() {
-      console.log('Speed changed to:', this.value);
-      window.myData.speed = parseInt(this.value);
-      window.myData.updated = true;
-      debouncedBleWrite();
-    });
-    console.log('Added listener for speed');
-  } else {
-    console.warn('speed element not found');
-  }
-
-  // Intensity control
-  const intensity = document.getElementById('intensity');
-  if (intensity) {
-    intensity.addEventListener('input', function() {
-      console.log('Intensity changed to:', this.value);
-      window.myData.intensity = parseInt(this.value);
-      window.myData.updated = true;
-      debouncedBleWrite();
-    });
-    console.log('Added listener for intensity');
-  } else {
-    console.warn('intensity element not found');
-  }
-
-  // Count control
-  const count = document.getElementById('count');
-  if (count) {
-    count.addEventListener('input', function() {
-      console.log('Count changed to:', this.value);
-      window.myData.count = parseInt(this.value);
-      window.myData.updated = true;
-      debouncedBleWrite();
-    });
-    console.log('Added listener for count');
-  } else {
-    console.warn('count element not found');
-  }
-
-  // Direction control
-  const direction = document.getElementById('direction');
-  if (direction) {
-    direction.addEventListener('change', function() {
-      console.log('Direction changed to:', this.value);
-      window.myData.direction = parseInt(this.value);
-      window.myData.updated = true;
-      debouncedBleWrite();
-    });
-    console.log('Added listener for direction');
-  } else {
-    console.warn('direction element not found');
-  }
-
-  // Color order control
-  const colorOrder = document.getElementById('colorOrder');
-  if (colorOrder) {
-    colorOrder.addEventListener('change', function() {
-      console.log('Color order changed to:', this.value);
-      window.myData.colorOrder = this.value;
-      window.myData.updated = true;
-      debouncedBleWrite();
-    });
-    console.log('Added listener for colorOrder');
-  } else {
-    console.warn('colorOrder element not found');
-  }
-
-  // Brightness control
-  const brightness = document.getElementById('brightness');
-  if (brightness) {
-    brightness.addEventListener('input', function() {
-      console.log('Brightness changed to:', this.value);
-      window.myData.brightness = parseInt(this.value);
-      window.myData.updated = true;
-      debouncedBleWrite();
-    });
-    console.log('Added listener for brightness');
-  } else {
-    console.warn('brightness element not found');
-  }
-
-  // LED count control
-  const ledCount = document.getElementById('ledCount');
-  if (ledCount) {
-    ledCount.addEventListener('input', function() {
-      console.log('LED count changed to:', this.value);
-      window.myData.ledCount = parseInt(this.value);
-      window.myData.updated = true;
-      debouncedBleWrite();
-    });
-    console.log('Added listener for ledCount');
-  } else {
-    console.warn('ledCount element not found');
-  }
-
-  // Pixel pin control
-  const pixelPin = document.getElementById('pixelPin');
-  if (pixelPin) {
-    pixelPin.addEventListener('input', function() {
-      console.log('Pixel pin changed to:', this.value);
-      window.myData.pixelPin = parseInt(this.value);
-      window.myData.updated = true;
-      debouncedBleWrite();
-    });
-    console.log('Added listener for pixelPin');
-  } else {
-    console.warn('pixelPin element not found');
-  }
-
-  // Max current control
-  const maxCurrent = document.getElementById('maxCurrent');
-  if (maxCurrent) {
-    maxCurrent.addEventListener('input', function() {
-      console.log('Max current changed to:', this.value);
-      window.myData.maxCurrent = parseInt(this.value);
-      window.myData.updated = true;
-      debouncedBleWrite();
-    });
-    console.log('Added listener for maxCurrent');
-  } else {
-    console.warn('maxCurrent element not found');
-  }
-
-  // Debug: List all input elements found
-  console.log('All input elements on page:', {
-    colorOne: !!document.getElementById('colorOne'),
-    colorTwo: !!document.getElementById('colorTwo'),
-    colorThree: !!document.getElementById('colorThree'),
-    speed: !!document.getElementById('speed'),
-    intensity: !!document.getElementById('intensity'),
-    count: !!document.getElementById('count'),
-    direction: !!document.getElementById('direction'),
-    brightness: !!document.getElementById('brightness'),
-    ledCount: !!document.getElementById('ledCount'),
-    pixelPin: !!document.getElementById('pixelPin'),
-    maxCurrent: !!document.getElementById('maxCurrent'),
-    animationMode: !!document.getElementById('animationMode'),
-    colorOrder: !!document.getElementById('colorOrder')
+  element.addEventListener(eventName, function handleControlChange() {
+    updateData(id, this.value);
   });
-});
+  element.dataset.lightsBound = 'true';
+}
 
-// Start connection monitoring
-setInterval(() => {
-  if (window.checkConnectionStatus) {
-    window.checkConnectionStatus();
+function bindControls() {
+  COLOR_FIELDS.forEach((field) => bindElement(field, 'input'));
+  NUMBER_FIELDS.forEach((field) => bindElement(field, 'input'));
+  SELECT_FIELDS.forEach((field) => bindElement(field, 'change'));
+}
+
+function handleDisconnect() {
+  window.notificationsActive = false;
+  window.charac = null;
+  applyUIState(false);
+  window.dispatchEvent(new CustomEvent('bleDisconnected'));
+}
+
+function attachDisconnectHandler(device) {
+  if (!device || device.datasetLightsDisconnectBound) {
+    return;
   }
-}, 1000);
+
+  device.addEventListener('gattserverdisconnected', handleDisconnect);
+  device.datasetLightsDisconnectBound = true;
+}
+
+function rememberDevice(device) {
+  if (!device?.id) {
+    return;
+  }
+
+  localStorage.setItem(LAST_DEVICE_ID_KEY, device.id);
+}
+
+function loadRememberedDeviceId() {
+  return localStorage.getItem(LAST_DEVICE_ID_KEY);
+}
+
+async function connectToDevice(device) {
+  attachDisconnectHandler(device);
+
+  const server = device.gatt.connected ? device.gatt : await device.gatt.connect();
+  const service = await server.getPrimaryService(SERVICE_UUID);
+  window.charac = await service.getCharacteristic(CHARACTERISTIC_UUID);
+
+  if (!window.notificationsActive) {
+    await window.charac.startNotifications();
+    window.charac.addEventListener('characteristicvaluechanged', window.bleRead);
+    window.notificationsActive = true;
+  }
+
+  rememberDevice(device);
+  applyUIState(true);
+  await window.bleWrite();
+  window.dispatchEvent(new CustomEvent('bleConnected'));
+  return true;
+}
+
+function sortReconnectCandidates(devices) {
+  const rememberedId = loadRememberedDeviceId();
+  const matchesName = (device) => device?.name === ESP_NAME;
+  const byRemembered = [];
+  const byName = [];
+
+  devices.forEach((device) => {
+    if (rememberedId && device.id === rememberedId) {
+      byRemembered.push(device);
+      return;
+    }
+
+    if (matchesName(device)) {
+      byName.push(device);
+    }
+  });
+
+  return [...byRemembered, ...byName];
+}
+
+async function withConnectionLock(connectAction) {
+  if (window.bleConnecting) {
+    return window.bleConnecting;
+  }
+
+  window.bleConnecting = (async () => {
+    try {
+      return await connectAction();
+    } finally {
+      window.bleConnecting = null;
+    }
+  })();
+
+  return window.bleConnecting;
+}
+
+window.getRandomColor = () => Math.floor(Math.random() * 0xffffff);
+
+window.saveSettings = persistSettings;
+window.buildEsp32Payload = buildEsp32Payload;
+
+window.loadSettings = () => {
+  window.myData = mergeStoredSettings();
+  return window.myData;
+};
+
+window.updateUIFromData = applyDataToUI;
+
+window.updateConnectionStatus = (connected) => {
+  applyUIState(Boolean(connected));
+};
+
+window.checkConnectionStatus = () => {
+  applyUIState(isConnected());
+};
+
+window.bleWrite = async () => {
+  if (!isConnected()) {
+    return;
+  }
+
+  if (window.processing) {
+    window.queued = true;
+    return;
+  }
+
+  window.processing = true;
+  window.queued = false;
+  persistSettings();
+
+  try {
+    const payload = buildEsp32Payload(window.myData);
+    const encoded = new TextEncoder().encode(JSON.stringify(payload));
+    if (window.charac.writeValueWithResponse) {
+      await window.charac.writeValueWithResponse(encoded);
+    } else {
+      await window.charac.writeValue(encoded);
+    }
+  } catch (error) {
+    console.error('Error during BLE write:', error);
+  } finally {
+    window.processing = false;
+    if (window.queued) {
+      window.queued = false;
+      window.bleWrite();
+    }
+  }
+};
+
+window.bleRead = async ({ target: { value } }) => {
+  const message = new TextDecoder().decode(value);
+
+  try {
+    const statusData = JSON.parse(message);
+    window.myData = normalizeSettings({
+      ...window.myData,
+      ...statusData,
+      updated: true
+    });
+    persistSettings();
+    applyDataToUI();
+  } catch (error) {
+    if (!['OK', 'TRIGGERED', 'Ready'].includes(message)) {
+      console.log('Non-JSON message from BLE:', message, error);
+    }
+  }
+};
+
+window.ble = async () => {
+  if (!('bluetooth' in navigator)) {
+    const error = new Error('Web Bluetooth is not supported in this browser.');
+    console.error(error.message);
+    window.dispatchEvent(new CustomEvent('bleConnectionFailed', { detail: error }));
+    return false;
+  }
+
+  if (isConnected()) {
+    applyUIState(true);
+    return true;
+  }
+
+  return withConnectionLock(async () => {
+    try {
+      const device = await navigator.bluetooth.requestDevice({
+        filters: [{ name: ESP_NAME }],
+        optionalServices: [SERVICE_UUID]
+      });
+      return await connectToDevice(device);
+    } catch (error) {
+      applyUIState(false);
+      console.error('Bluetooth connection failed:', error);
+      window.dispatchEvent(new CustomEvent('bleConnectionFailed', { detail: error }));
+      return false;
+    }
+  });
+};
+
+window.bleAutoReconnect = async () => {
+  if (!('bluetooth' in navigator) || typeof navigator.bluetooth.getDevices !== 'function') {
+    return false;
+  }
+
+  if (isConnected()) {
+    applyUIState(true);
+    return true;
+  }
+
+  return withConnectionLock(async () => {
+    try {
+      const authorizedDevices = await navigator.bluetooth.getDevices();
+      const candidates = sortReconnectCandidates(authorizedDevices);
+
+      for (const device of candidates) {
+        try {
+          const connected = await connectToDevice(device);
+          if (connected) {
+            return true;
+          }
+        } catch (error) {
+          console.warn('Auto-reconnect candidate failed:', device?.name || device?.id, error);
+        }
+      }
+    } catch (error) {
+      console.warn('Auto-reconnect unavailable:', error);
+    }
+
+    applyUIState(false);
+    return false;
+  });
+};
+
+window.toggleAnimationMode = (direction) => {
+  const animationMode = document.getElementById('animationMode');
+  if (!animationMode) {
+    return;
+  }
+
+  const optionCount = animationMode.options.length;
+  const nextIndex = (animationMode.selectedIndex + direction + optionCount) % optionCount;
+  animationMode.selectedIndex = nextIndex;
+  updateData('animationMode', animationMode.value);
+};
+
+window.randomizeColors = () => {
+  COLOR_FIELDS.forEach((field) => {
+    const element = document.getElementById(field);
+    const nextColor = window.getRandomColor();
+
+    window.myData[field] = nextColor;
+    if (element) {
+      element.value = hexIntToColor(nextColor);
+    }
+  });
+
+  window.myData.updated = true;
+  persistSettings();
+
+  if (isConnected()) {
+    window.bleWrite();
+  }
+};
+
+window.initLightsController = () => {
+  window.myData = mergeStoredSettings();
+  bindControls();
+  applyDataToUI();
+  applyUIState(isConnected());
+
+  // Try reconnecting silently if the browser already has permission for the ESP32.
+  window.bleAutoReconnect();
+};
+
+if (!window.__lightsDisableAutoBind) {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      window.initLightsController();
+    }, { once: true });
+  } else {
+    window.initLightsController();
+  }
+}

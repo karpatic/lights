@@ -27,8 +27,8 @@ struct_message myData = {
     50,           // speed (default 50)
     75,           // intensity (default 75)
     0,            // direction (default forward)
-    false,        // To know if myData was updated
-    2             // count (default 2)
+    2,            // count (default 2)
+    true          // render the initial state once on startup
 }; 
 struct_message myOldData; 
 Adafruit_NeoPixel strip(myData.pixelCount, myData.pixelPin, myData.colorOrder);
@@ -47,6 +47,7 @@ void setup() {
   // Initialize strip data arrays
   stripData = new StripData(myData.pixelCount);
   stripDataOld = new StripData(myData.pixelCount);
+  cloneData(myData, myOldData);
   // Remove: currentMode = myData.lightMode;
   
   initializeBLE(); // Initialize BLE using communication module
@@ -94,7 +95,6 @@ void handleStrip() {
       }
     }
 
-    cloneData(myData, myOldData);
     Serial.println(F("Updating strip settings...")); 
     strip.setBrightness(convertBrightness(myData.brightness));
     strip.updateLength(myData.ledCount);

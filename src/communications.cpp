@@ -10,6 +10,10 @@ bool deviceConnected = false;
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b2623"
 #define ESPNAME "Music Strip"
 
+constexpr int MIN_LED_COUNT = 1;
+constexpr int MAX_LED_COUNT = 1000;
+constexpr uint16_t DEFAULT_COLOR_ORDER = NEO_GRB + NEO_KHZ800;
+
 // Convert 0-100 scale to 0-255 PWM scale
 uint8_t convertBrightness(int valu) {
   if (valu <= 0) return 0;  // Off
@@ -96,24 +100,69 @@ void debugParsedData(const struct_message &data) {
   Serial.println(F("=== Parsed JSON Data ==="));
   Serial.printf("brightness: %d | lightMode: %s\n", data.brightness, data.lightMode);
   Serial.printf("colors: one=0x%06X, two=0x%06X, three=0x%06X\n", data.colorOne, data.colorTwo, data.colorThree);
-  Serial.printf("speed: %d | intensity: %d | direction: %d\n", data.speed, data.intensity, data.direction);
+  Serial.printf("speed: %d | intensity: %d | direction: %d | count: %d\n", data.speed, data.intensity, data.direction, data.count);
   Serial.printf("hardware: maxCurrent=%d | colorOrder: 0x%04X\n", data.maxCurrent, data.colorOrder);
-  Serial.printf("pins: pixelPin=%d | pixelCount=%d\n", data.pixelPin, data.pixelCount);
+  Serial.printf("pins: pixelPin=%d | ledCount=%d | pixelCount=%d\n", data.pixelPin, data.ledCount, data.pixelCount);
   checkMemory();
   Serial.println(F("========================"));
 }
 
 uint16_t parseColorOrder(const char* orderStr) {
-  uint16_t order = strip.str2order(orderStr);
+  if (!orderStr) {
+    return DEFAULT_COLOR_ORDER;
+  }
+
+  String normalized = String(orderStr);
+  normalized.trim();
+  normalized.toUpperCase();
+  if (normalized.startsWith("NEO_")) {
+    normalized.remove(0, 4);
+  }
+
+  if (normalized.length() != 3) {
+    return DEFAULT_COLOR_ORDER;
+  }
+
+  uint16_t order = strip.str2order(normalized.c_str());
   return order + NEO_KHZ800;
 }
 
 uint32_t parseColorString(const char* colorStr) {
+  if (!colorStr) {
+    return 0;
+  }
+
+  if (colorStr[0] == '#') {
+    return strtoul(colorStr + 1, nullptr, 16) & 0xFFFFFF;
+  }
+
   int r, g, b;
   if (sscanf(colorStr, "%d,%d,%d", &r, &g, &b) == 3) {
+    r = constrain(r, 0, 255);
+    g = constrain(g, 0, 255);
+    b = constrain(b, 0, 255);
     return (uint32_t)r << 16 | (uint32_t)g << 8 | (uint32_t)b;
   }
-  return 0; // Default to black if parsing fails
+
+  char *endPtr = nullptr;
+  uint32_t parsed = strtoul(colorStr, &endPtr, 0);
+  if (endPtr && endPtr != colorStr) {
+    return parsed & 0xFFFFFF;
+  }
+
+  return 0;
+}
+
+uint32_t parseColorValue(JsonVariantConst value, uint32_t fallback) {
+  if (value.is<const char*>()) {
+    return parseColorString(value.as<const char*>());
+  }
+
+  if (value.is<uint32_t>() || value.is<int>()) {
+    return value.as<uint32_t>() & 0xFFFFFF;
+  }
+
+  return fallback;
 }
 
 void parseAndUpdateData(const std::string &jsonString, struct_message &data) {
@@ -125,8 +174,8 @@ void parseAndUpdateData(const std::string &jsonString, struct_message &data) {
   Serial.print(F("Received JSON: "));
   Serial.println(jsonString.c_str());
   
-  DynamicJsonDocument jsonDoc(512);
-  DeserializationError error = deserializeJson(jsonDoc, jsonString);
+  DynamicJsonDocument jsonDoc(1024);
+  DeserializationError error = deserializeJson(jsonDoc, jsonString.c_str());
 
   if (error) {
     Serial.print(F("JSON parsing failed: "));
@@ -145,35 +194,33 @@ void parseAndUpdateData(const std::string &jsonString, struct_message &data) {
     strlcpy(data.lightMode, (const char*)jsonDoc["lightMode"], sizeof(data.lightMode));
   }
   if (jsonDoc.containsKey("colorOne")) {
-    const char* colorStr = jsonDoc["colorOne"];
-    data.colorOne = parseColorString(colorStr);
+    data.colorOne = parseColorValue(jsonDoc["colorOne"], data.colorOne);
   }
   if (jsonDoc.containsKey("colorTwo")) {
-    const char* colorStr = jsonDoc["colorTwo"];
-    data.colorTwo = parseColorString(colorStr);
+    data.colorTwo = parseColorValue(jsonDoc["colorTwo"], data.colorTwo);
   }
   if (jsonDoc.containsKey("colorThree")) {
-    const char* colorStr = jsonDoc["colorThree"];
-    data.colorThree = parseColorString(colorStr);
+    data.colorThree = parseColorValue(jsonDoc["colorThree"], data.colorThree);
   }
+  bool ledCountUpdated = false;
   if (jsonDoc.containsKey("ledCount")) {
-    data.ledCount = jsonDoc["ledCount"];
+    data.ledCount = constrain((int)jsonDoc["ledCount"], MIN_LED_COUNT, MAX_LED_COUNT);
+    ledCountUpdated = true;
   }
   if (jsonDoc.containsKey("colorOrder")) {
     const char* orderStr = jsonDoc["colorOrder"];
     data.colorOrder = parseColorOrder(orderStr);
-  } else {
-    // Default color order if not specified
-    data.colorOrder = NEO_RGB + NEO_KHZ800;
   } 
   if (jsonDoc.containsKey("maxCurrent")) {
-    data.maxCurrent = jsonDoc["maxCurrent"];
+    data.maxCurrent = constrain((int)jsonDoc["maxCurrent"], 0, 50000);
   }
   if (jsonDoc.containsKey("pixelPin")) {
-    data.pixelPin = jsonDoc["pixelPin"];
+    data.pixelPin = constrain((int)jsonDoc["pixelPin"], 0, 48);
   }
   if (jsonDoc.containsKey("pixelCount")) {
-    data.pixelCount = jsonDoc["pixelCount"];
+    data.pixelCount = constrain((int)jsonDoc["pixelCount"], MIN_LED_COUNT, MAX_LED_COUNT);
+  } else if (ledCountUpdated) {
+    data.pixelCount = data.ledCount;
   }
   if (jsonDoc.containsKey("speed")) {
     int speed = jsonDoc["speed"];

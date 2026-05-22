@@ -20,6 +20,7 @@
         '/index.html': './ipynb/index.ipynb', 
         '/audio.html': './ipynb/audio.ipynb',
         '/board_designs.html': './ipynb/board_design.ipynb',
+        '/esp32.html': './ipynb/esp32.ipynb',
         '/esp_idf.html': './ipynb/esp_idf.ipynb',
         '/esp_now.html': './ipynb/esp_now.ipynb',
         '/licensing.html': './ipynb/licensing.ipynb',
@@ -105,15 +106,18 @@
 
       // Function to navigate to a path and update URL
       function navigateToPath(path) {
-        if (notebookPaths[path]) {
-          document.body.dataset.currentNotebook = path;
-          // Update URL with hash - keep the leading / in hash
-          const hashPath = path === '/' ? '' : path.replace('.html', '');
-          window.history.pushState({ path: path }, '', hashPath ? `#${hashPath}` : '#');
-          loadNotebook(notebookPaths[path]);
-          // Scroll to top when navigating
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (!notebookPaths[path]) {
+          return false;
         }
+
+        document.body.dataset.currentNotebook = path;
+        // Update URL with hash - keep the leading / in hash
+        const hashPath = path === '/' ? '' : path.replace('.html', '');
+        window.history.pushState({ path: path }, '', hashPath ? `#${hashPath}` : '#');
+        loadNotebook(notebookPaths[path]);
+        // Scroll to top when navigating
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return true;
       }
 
       // Function to intercept all link clicks
@@ -128,8 +132,6 @@
           
           // Only intercept links that start with "/" (internal links)
           if (href && href.startsWith('/')) {
-            e.preventDefault();
-            
             let path = href;
             
             // Handle paths without .html extension
@@ -137,8 +139,11 @@
               path = `${path}.html`;
             }
             
-            // Navigate to the path
-            navigateToPath(path);
+            // Only hijack notebook routes. Real HTML pages should open normally.
+            if (notebookPaths[path]) {
+              e.preventDefault();
+              navigateToPath(path);
+            }
           }
           // External links and other links will work normally
         });
