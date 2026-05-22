@@ -278,6 +278,120 @@ body {
   border-color: #f97316;
 } 
 
+.profile-toolbar {
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+.profile-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.profile-card {
+  border: 2px solid var(--gray-200);
+  border-radius: var(--border-radius);
+  background: linear-gradient(135deg, #ffffff 0%, var(--gray-50) 100%);
+  padding: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.profile-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.profile-card.active {
+  border-color: var(--primary-color);
+  background: linear-gradient(135deg, #eef2ff 0%, #ffffff 100%);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.profile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.profile-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.profile-mode {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.profile-settings {
+  margin-top: 6px;
+  font-size: 0.74rem;
+  color: var(--gray-600);
+}
+
+.profile-edit-btn {
+  border: 1px solid var(--gray-300);
+  background: #fff;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 5px 7px;
+  transition: var(--transition);
+}
+
+.profile-edit-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.profile-remove-btn {
+  border: 1px solid #fecaca;
+  background: #fff5f5;
+  border-radius: 6px;
+  color: #b91c1c;
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 5px 7px;
+  transition: var(--transition);
+}
+
+.profile-remove-btn:hover {
+  border-color: #fca5a5;
+  background: #fee2e2;
+}
+
+.profile-card.create-new {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 78px;
+  border-style: dashed;
+  color: var(--primary-color);
+  font-weight: 600;
+  background: linear-gradient(135deg, #f8faff 0%, #ffffff 100%);
+}
+
+.profile-card.create-new:hover {
+  background: linear-gradient(135deg, #eef2ff 0%, #ffffff 100%);
+}
+
 @media (max-width: 768px) {
   body { padding: 10px; }
   .header h1 { font-size: 1.8rem; }

@@ -27,54 +27,15 @@
 
     <div id="btDash" class="dashboard hidden">
       <div class="card">
-        <h3>Colors</h3>
-        <div class="colors-grid">
-          <div class="control-group">
-            <label for="colorOne">Primary Color</label>
-            <input type="color" class="color-input" id="colorOne" value="#ff0000" />
-          </div>
-          <div class="control-group">
-            <label for="colorTwo">Secondary Color</label>
-            <input type="color" class="color-input" id="colorTwo" value="#00ff00" />
-          </div>
-          <div class="control-group">
-            <label for="colorThree">Accent Color</label>
-            <input type="color" class="color-input" id="colorThree" value="#0000ff" />
-          </div>
+        <h3>Saved Settings</h3>
+        <div class="profile-toolbar">
+          <button class="anim-btn" id="saveProfileBtn" type="button">Save Current</button>
         </div>
-        <div style="margin-top: 12px;">
-          <button class="anim-btn random-btn" onclick="w.randomizeColors()">🎲 Random Colors</button>
-        </div>
+        <div id="profileCards" class="profile-cards"></div>
       </div>
 
       <div class="card">
         <h3>Mode Settings</h3>
-        <div class="settings-grid">
-          <div class="control-group">
-            <label for="brightness">Brightness</label>
-            <input type="number" class="number-input" step="5" min="0" max="100" id="brightness" value="20"/>
-          </div>
-          <div class="control-group">
-            <label for="speed">Speed</label>
-            <input type="number" class="number-input" min="0" max="100" step="5" id="speed" value="50"/>
-          </div>
-          <div class="control-group">
-            <label for="intensity">Intensity</label>
-            <input type="number" class="number-input" min="0" max="100" step="5" id="intensity" value="75"/>
-          </div>
-          <div class="control-group">
-            <label for="count">Count</label>
-            <input type="number" class="number-input" min="1" max="10" step="1" id="count" value="2"/>
-          </div>
-          <div class="control-group">
-            <label for="direction">Direction</label>
-            <select class="number-input" id="direction">
-              <option value="0" selected>Forward</option>
-              <option value="1">Reverse</option>
-              <option value="2">Bounce</option>
-            </select>
-          </div>
-        </div>
         <div class="control-group" style="margin-top: 12px;">
           <label for="animationMode">Animation Mode</label>
           <select class="number-input" id="animationMode">
@@ -119,6 +80,49 @@
         <div style="margin-top: 12px; display: flex; gap: 8px;">
           <button class="anim-btn" style="flex: 1;" onclick="w.toggleAnimationMode(-1)">▲ Previous</button>
           <button class="anim-btn" style="flex: 1;" onclick="w.toggleAnimationMode(1)">▼ Next</button>
+        </div>
+        <div class="colors-grid" style="margin-top: 12px;">
+          <div class="control-group">
+            <label for="colorOne">Primary Color</label>
+            <input type="color" class="color-input" id="colorOne" value="#ff0000" />
+          </div>
+          <div class="control-group">
+            <label for="colorTwo">Secondary Color</label>
+            <input type="color" class="color-input" id="colorTwo" value="#00ff00" />
+          </div>
+          <div class="control-group">
+            <label for="colorThree">Accent Color</label>
+            <input type="color" class="color-input" id="colorThree" value="#0000ff" />
+          </div>
+        </div>
+        <div style="margin-top: 12px;">
+          <button class="anim-btn random-btn" onclick="w.randomizeColors()">🎲 Random Colors</button>
+        </div>
+        <div class="settings-grid">
+          <div class="control-group">
+            <label for="brightness">Brightness</label>
+            <input type="number" class="number-input" step="5" min="0" max="100" id="brightness" value="20"/>
+          </div>
+          <div class="control-group">
+            <label for="speed">Speed</label>
+            <input type="number" class="number-input" min="0" max="100" step="5" id="speed" value="50"/>
+          </div>
+          <div class="control-group">
+            <label for="intensity">Intensity</label>
+            <input type="number" class="number-input" min="0" max="100" step="5" id="intensity" value="75"/>
+          </div>
+          <div class="control-group">
+            <label for="count">Count</label>
+            <input type="number" class="number-input" min="1" max="10" step="1" id="count" value="2"/>
+          </div>
+          <div class="control-group">
+            <label for="direction">Direction</label>
+            <select class="number-input" id="direction">
+              <option value="0" selected>Forward</option>
+              <option value="1">Reverse</option>
+              <option value="2">Bounce</option>
+            </select>
+          </div>
         </div>
       </div>
 
