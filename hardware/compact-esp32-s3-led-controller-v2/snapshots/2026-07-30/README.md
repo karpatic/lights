@@ -6,9 +6,10 @@ It is a **recovery/reference snapshot, not a fabrication release**.
 
 ## Contents
 
-- `easyeda/`: saved EasyEDA Standard project and PCB JSON.
-- `automation/`: deterministic V2 schematic, wiring, two-layer configuration, placement, routing, and fixture scripts, plus generated component-ID state.
+- `easyeda/`: saved EasyEDA Standard project and PCB JSON plus the native `info` metadata needed for project restoration. The `info` BOM fields are stale and are not sourcing authority.
+- `automation/`: current deterministic V2 schematic, wiring, two-layer configuration, portrait placement, and generated component-ID state.
 - `automation/dependencies/`: the shared EasyEDA/CDP helper imported by the V2 scripts.
+- `archive-stale/`: the old 36 × 25 mm routing and fixture-generation scripts. No compatible portrait routing script existed at snapshot time.
 - `fixture-stale/`: fixture outputs from the older 36 × 25 mm / 2.54 mm-pitch geometry. They are preserved for history only and must not be manufactured.
 - `MANIFEST.sha256`: integrity hashes for every backed-up artifact except the manifest itself.
 

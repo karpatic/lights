@@ -10,6 +10,17 @@ Firmware, BLE control, browser tooling, and hardware design for addressable LED 
 
 The ESP32-S3 controller is currently a design-in-progress EasyEDA V2 project, not a fabrication release. Its hardware record includes the electrical and mechanical architecture, input/fuse decision, cost assumptions, firmware compatibility gaps, release gates, and a dated recovery snapshot of the EasyEDA/automation sources.
 
+## Active hardware
+
+- Revision: `Compact ESP32-S3 USB LED Controller V2`
+- Module: ESP32-S3-MINI-1-N8 with 8 MB flash and embedded antenna
+- Supply: regulated 5 V input; a bare LiPo is not supported
+- LED interface: protected 5 V, GPIO18 through a 5 V AHCT buffer, and common ground
+- Programming: six-pad UART fixture providing 5V, GND, TX, RX, EN, and BOOT
+- Authority/status: [current design record](hardware/compact-esp32-s3-led-controller-v2/DESIGN.md); no fabrication release or shared EasyEDA cloud URL exists yet
+
+The current firmware still targets generic `esp32dev`, defaults to GPIO15, and does not enforce its `maxCurrent` field. See the design record before treating the firmware and V2 hardware as compatible.
+
 I find that swipe is actually both an light mode AND also a transition effect.
 
 chrome://flags/ -> Enable BT 
