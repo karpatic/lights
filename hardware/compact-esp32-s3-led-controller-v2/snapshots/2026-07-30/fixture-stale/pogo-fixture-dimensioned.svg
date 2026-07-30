@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="430" viewBox="0 0 920 430">
+<style>text{font-family:monospace;font-size:12px}.board{fill:#eef6ff;stroke:#123b66;stroke-width:2}.pad{fill:#d6a500;stroke:#5b4500}.support{fill:none;stroke:#555;stroke-dasharray:4 3}.relief{fill:#ffd9d9;stroke:#a00;stroke-dasharray:5 3}.dim{stroke:#333;marker-start:url(#a);marker-end:url(#a)}</style>
+<defs><marker id="a" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,3 L6,0 L6,6 Z" fill="#333"/></marker></defs>
+<text x="55" y="30" font-size="17">BOARD TOP / PHYSICAL PROJECTION</text>
+<polygon class="board" points="70.0,95 415.0,95 415.0,345.0 55,345.0 55,110.0 70.0,95"/>
+<text x="505" y="30" font-size="17">MIRRORED BOTTOM VIEW</text>
+<polygon class="board" points="850.0,95 505.0,95 505.0,345.0 865.0,345.0 865.0,110.0 850.0,95"/>
+<rect class="relief" x="252.32" y="44.480000000000004" width="155.0" height="50.519999999999996"/><text x="255" y="38">ANTENNA OVERHANG 5.05</text>
+<rect class="relief" x="285.12" y="345" width="98.53999999999999" height="24.729999999999997"/><text x="285" y="373">USB RELIEF</text>
+<rect class="pad" x="169.42000000000002" y="222.12" width="15" height="15"/>
+<text x="166.92000000000002" y="233.62" text-anchor="end">BOOT</text>
+<rect class="pad" x="735.5799999999999" y="222.12" width="15" height="15"/>
+<text x="753.0799999999999" y="233.62" text-anchor="start">BOOT</text>
+<rect class="pad" x="194.82" y="222.12" width="15" height="15"/>
+<text x="192.32" y="233.62" text-anchor="end">GND</text>
+<rect class="pad" x="710.1800000000001" y="222.12" width="15" height="15"/>
+<text x="727.6800000000001" y="233.62" text-anchor="start">GND</text>
+<rect class="pad" x="169.42000000000002" y="247.51999999999998" width="15" height="15"/>
+<text x="166.92000000000002" y="259.02" text-anchor="end">TX</text>
+<rect class="pad" x="735.5799999999999" y="247.51999999999998" width="15" height="15"/>
+<text x="753.0799999999999" y="259.02" text-anchor="start">TX</text>
+<rect class="pad" x="194.82" y="247.51999999999998" width="15" height="15"/>
+<text x="192.32" y="259.02" text-anchor="end">EN</text>
+<rect class="pad" x="710.1800000000001" y="247.51999999999998" width="15" height="15"/>
+<text x="727.6800000000001" y="259.02" text-anchor="start">EN</text>
+<rect class="pad" x="169.42000000000002" y="272.92" width="15" height="15"/>
+<text x="166.92000000000002" y="284.42" text-anchor="end">5V</text>
+<rect class="pad" x="735.5799999999999" y="272.92" width="15" height="15"/>
+<text x="753.0799999999999" y="284.42" text-anchor="start">5V</text>
+<rect class="pad" x="194.82" y="272.92" width="15" height="15"/>
+<text x="192.32" y="284.42" text-anchor="end">RX</text>
+<rect class="pad" x="710.1800000000001" y="272.92" width="15" height="15"/>
+<text x="727.6800000000001" y="284.42" text-anchor="start">RX</text>
+<circle class="support" cx="85.0" cy="135.0" r="15"/><text x="77.0" y="139.0">S1</text>
+<circle class="support" cx="225.0" cy="135.0" r="15"/><text x="217.0" y="139.0">S2</text>
+<circle class="support" cx="85.0" cy="275.0" r="15"/><text x="77.0" y="279.0">S3</text>
+<circle class="support" cx="245.0" cy="315.0" r="15"/><text x="237.0" y="319.0">S4</text>
+<line class="dim" x1="55" y1="380.0" x2="415.0" y2="380.0"/><text x="210.0" y="400.0">36.000 mm</text>
+<line class="dim" x1="25" y1="95" x2="25" y2="345.0"/><text transform="translate(15,255.0) rotate(-90)">25.000 mm</text>
+<text x="55" y="425">Chamfered corner is TOP-LEFT. Coordinates are millimetres. Pad squares are 1.50 mm; pitch is 2.54 mm.</text>
+</svg>

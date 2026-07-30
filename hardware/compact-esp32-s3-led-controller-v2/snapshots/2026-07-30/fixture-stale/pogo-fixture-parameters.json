@@ -1,0 +1,200 @@
+{
+  "authority": "Generated from active EasyEDA V2 PCB source",
+  "units": "mm",
+  "board": {
+    "width": 36.0,
+    "height": 25.0,
+    "origin": "carrier top-left extent; +X right, +Y toward USB/pigtail edge",
+    "outline_top_view": [
+      [
+        1.5,
+        0
+      ],
+      [
+        36.0,
+        0
+      ],
+      [
+        36.0,
+        25.0
+      ],
+      [
+        0,
+        25.0
+      ],
+      [
+        0,
+        1.5
+      ],
+      [
+        1.5,
+        0
+      ]
+    ],
+    "top_left_chamfer": 1.5
+  },
+  "orientation": {
+    "antenna": "top edge; module antenna overhang 5.05 mm",
+    "usb_c": "bottom-right edge; shell overhang about 2.47 mm",
+    "pigtail": "bottom-left edge",
+    "anti_reversal": "1.50-mm top-left PCB chamfer plus asymmetric antenna/USB reliefs"
+  },
+  "pogo": {
+    "pads": [
+      {
+        "signal": "BOOT",
+        "board_top_x_mm": 12.192,
+        "board_top_y_mm": 13.462,
+        "board_bottom_view_x_mm": 23.808,
+        "board_bottom_view_y_mm": 13.462,
+        "jig_probe_plate_x_mm": 12.192,
+        "jig_probe_plate_y_mm": 13.462,
+        "pad_width_mm": 1.499997,
+        "pad_height_mm": 1.499997,
+        "pcb_side": "bottom"
+      },
+      {
+        "signal": "GND",
+        "board_top_x_mm": 14.732,
+        "board_top_y_mm": 13.462,
+        "board_bottom_view_x_mm": 21.268,
+        "board_bottom_view_y_mm": 13.462,
+        "jig_probe_plate_x_mm": 14.732,
+        "jig_probe_plate_y_mm": 13.462,
+        "pad_width_mm": 1.499997,
+        "pad_height_mm": 1.499997,
+        "pcb_side": "bottom"
+      },
+      {
+        "signal": "TX",
+        "board_top_x_mm": 12.192,
+        "board_top_y_mm": 16.002,
+        "board_bottom_view_x_mm": 23.808,
+        "board_bottom_view_y_mm": 16.002,
+        "jig_probe_plate_x_mm": 12.192,
+        "jig_probe_plate_y_mm": 16.002,
+        "pad_width_mm": 1.499997,
+        "pad_height_mm": 1.499997,
+        "pcb_side": "bottom"
+      },
+      {
+        "signal": "EN",
+        "board_top_x_mm": 14.732,
+        "board_top_y_mm": 16.002,
+        "board_bottom_view_x_mm": 21.268,
+        "board_bottom_view_y_mm": 16.002,
+        "jig_probe_plate_x_mm": 14.732,
+        "jig_probe_plate_y_mm": 16.002,
+        "pad_width_mm": 1.499997,
+        "pad_height_mm": 1.499997,
+        "pcb_side": "bottom"
+      },
+      {
+        "signal": "5V",
+        "board_top_x_mm": 12.192,
+        "board_top_y_mm": 18.542,
+        "board_bottom_view_x_mm": 23.808,
+        "board_bottom_view_y_mm": 18.542,
+        "jig_probe_plate_x_mm": 12.192,
+        "jig_probe_plate_y_mm": 18.542,
+        "pad_width_mm": 1.499997,
+        "pad_height_mm": 1.499997,
+        "pcb_side": "bottom"
+      },
+      {
+        "signal": "RX",
+        "board_top_x_mm": 14.732,
+        "board_top_y_mm": 18.542,
+        "board_bottom_view_x_mm": 21.268,
+        "board_bottom_view_y_mm": 18.542,
+        "jig_probe_plate_x_mm": 14.732,
+        "jig_probe_plate_y_mm": 18.542,
+        "pad_width_mm": 1.499997,
+        "pad_height_mm": 1.499997,
+        "pcb_side": "bottom"
+      }
+    ],
+    "grid_columns": 2,
+    "grid_rows": 3,
+    "pitch_x": 2.54,
+    "pitch_y": 2.54,
+    "pad": [
+      1.5,
+      1.5
+    ],
+    "recommended_probe_tip_max_diameter": 1.0,
+    "nominal_printed_bore": 1.35,
+    "bore_note": "Tune to the selected barrel/sleeve and printer using a hole coupon; do not order from this nominal alone.",
+    "working_compression_range": [
+      1.3,
+      1.7
+    ],
+    "compression_note": "Model-dependent; verify selected probe data sheet and assembled stack."
+  },
+  "supports": [
+    [
+      "S1",
+      3.0,
+      4.0
+    ],
+    [
+      "S2",
+      17.0,
+      4.0
+    ],
+    [
+      "S3",
+      3.0,
+      18.0
+    ],
+    [
+      "S4",
+      19.0,
+      22.0
+    ]
+  ],
+  "clamps": [
+    [
+      "CLAMP_LEFT",
+      0.0,
+      12.0
+    ],
+    [
+      "CLAMP_BOTTOM",
+      18.0,
+      25.0
+    ]
+  ],
+  "fixture_base": {
+    "width": 48,
+    "height": 41,
+    "thickness": 6,
+    "board_origin": [
+      6,
+      10
+    ],
+    "mount_holes": [
+      [
+        "M1",
+        3.5,
+        3.5
+      ],
+      [
+        "M2",
+        44.5,
+        3.5
+      ],
+      [
+        "M3",
+        3.5,
+        37.5
+      ],
+      [
+        "M4",
+        44.5,
+        37.5
+      ]
+    ]
+  },
+  "coordinate_warning": "board_bottom_view_x is mirrored artwork/viewing geometry. Actual probe-plate machining with the board TOP facing up uses jig_probe_plate_x/y, which equal the physical board projection."
+}

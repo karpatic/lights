@@ -1,5 +1,15 @@
 # LED Lighting Effects and Utility Functions
 
+Firmware, BLE control, browser tooling, and hardware design for addressable LED installations.
+
+## Project map
+
+- Firmware and effects: [`src/`](src/)
+- Browser/BLE controls: [`index.html`](index.html), [`bt.html`](bt.html), and [`lights.js`](lights.js)
+- Compact ESP32-S3 production controller: [`hardware/compact-esp32-s3-led-controller-v2/`](hardware/compact-esp32-s3-led-controller-v2/)
+
+The ESP32-S3 controller is currently a design-in-progress EasyEDA V2 project, not a fabrication release. Its hardware record includes the electrical and mechanical architecture, input/fuse decision, cost assumptions, firmware compatibility gaps, release gates, and a dated recovery snapshot of the EasyEDA/automation sources.
+
 I find that swipe is actually both an light mode AND also a transition effect.
 
 chrome://flags/ -> Enable BT 

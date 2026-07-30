@@ -1,0 +1,7 @@
+signal,board_top_x_mm,board_top_y_mm,board_bottom_view_x_mm,board_bottom_view_y_mm,jig_probe_plate_x_mm,jig_probe_plate_y_mm,pad_width_mm,pad_height_mm,pcb_side
+BOOT,12.192,13.462,23.808,13.462,12.192,13.462,1.500,1.500,bottom
+GND,14.732,13.462,21.268,13.462,14.732,13.462,1.500,1.500,bottom
+TX,12.192,16.002,23.808,16.002,12.192,16.002,1.500,1.500,bottom
+EN,14.732,16.002,21.268,16.002,14.732,16.002,1.500,1.500,bottom
+5V,12.192,18.542,23.808,18.542,12.192,18.542,1.500,1.500,bottom
+RX,14.732,18.542,21.268,18.542,14.732,18.542,1.500,1.500,bottom

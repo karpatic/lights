@@ -1,0 +1,11 @@
+feature,frame,x_mm,y_mm,diameter_mm,purpose
+S1,board_top_projection,3.0,4.0,3.0,nonconductive PCB support post
+S2,board_top_projection,17.0,4.0,3.0,nonconductive PCB support post
+S3,board_top_projection,3.0,18.0,3.0,nonconductive PCB support post
+S4,board_top_projection,19.0,22.0,3.0,nonconductive PCB support post
+CLAMP_LEFT,board_top_projection,0.0,12.0,,suggested compliant clamp center
+CLAMP_BOTTOM,board_top_projection,18.0,25.0,,suggested compliant clamp center
+M1,fixture_base,3.5,3.5,3.4,M3 fixture mounting clearance
+M2,fixture_base,44.5,3.5,3.4,M3 fixture mounting clearance
+M3,fixture_base,3.5,37.5,3.4,M3 fixture mounting clearance
+M4,fixture_base,44.5,37.5,3.4,M3 fixture mounting clearance

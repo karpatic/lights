@@ -1,0 +1,1062 @@
+{
+  "target_project": "Compact ESP32-S3 USB LED Controller V2",
+  "module": {
+    "uuid": "5033b192a6974b3a9787ebfd24605149",
+    "mpn": "ESP32-S3-MINI-1-N8",
+    "lcsc": "C2913206",
+    "jlcpcb_part_class": "Extended Part",
+    "verified_smt_stock_on_2026-07-29": 3806
+  },
+  "ids": {
+    "U_ESP": "gge14428",
+    "J_USB": "gge15550",
+    "D_VBUS": "gge15862",
+    "F_VBUS": "gge15916",
+    "U_3V3": "gge15976",
+    "U_LEVEL": "gge16087",
+    "J_LED": "gge16207",
+    "R_CC1": "gge16294",
+    "R_CC2": "gge16348",
+    "R_EN": "gge16402",
+    "C_EN": "gge16456",
+    "R_BOOT": "gge16525",
+    "R_LEVEL_PD": "gge16579",
+    "R_DATA": "gge16642",
+    "C_LEVEL": "gge16696",
+    "C_VBUS_IN": "gge16765",
+    "C_3V3_OUT1": "gge16825",
+    "C_ESP_DEC": "gge16897",
+    "TP_5V": "gge16969",
+    "TP_GND": "gge17011",
+    "TP_TX": "gge17053",
+    "TP_RX": "gge17095",
+    "TP_EN": "gge17137",
+    "TP_BOOT": "gge17179"
+  },
+  "pins": {
+    "U_ESP": [
+      {
+        "gid": "gge41",
+        "number": "1",
+        "name": "GND",
+        "x": 715.0,
+        "y": 25.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge42",
+        "number": "2",
+        "name": "GND",
+        "x": 715.0,
+        "y": 35.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge14479",
+        "number": "3",
+        "name": "3V3",
+        "x": 715.0,
+        "y": 45.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge44",
+        "number": "4",
+        "name": "IO0",
+        "x": 715.0,
+        "y": 55.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge45",
+        "number": "5",
+        "name": "IO1",
+        "x": 715.0,
+        "y": 65.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge46",
+        "number": "6",
+        "name": "IO2",
+        "x": 715.0,
+        "y": 75.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge47",
+        "number": "7",
+        "name": "IO3",
+        "x": 715.0,
+        "y": 85.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge48",
+        "number": "8",
+        "name": "IO4",
+        "x": 715.0,
+        "y": 95.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge14590",
+        "number": "9",
+        "name": "IO5",
+        "x": 715.0,
+        "y": 105.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge410",
+        "number": "10",
+        "name": "IO6",
+        "x": 715.0,
+        "y": 115.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge411",
+        "number": "11",
+        "name": "IO7",
+        "x": 715.0,
+        "y": 125.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge412",
+        "number": "12",
+        "name": "IO8",
+        "x": 715.0,
+        "y": 135.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge413",
+        "number": "13",
+        "name": "IO9",
+        "x": 715.0,
+        "y": 145.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge414",
+        "number": "14",
+        "name": "IO10",
+        "x": 715.0,
+        "y": 155.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge415",
+        "number": "15",
+        "name": "IO11",
+        "x": 715.0,
+        "y": 165.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge416",
+        "number": "16",
+        "name": "IO12",
+        "x": 715.0,
+        "y": 175.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge417",
+        "number": "17",
+        "name": "IO13",
+        "x": 715.0,
+        "y": 185.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge418",
+        "number": "18",
+        "name": "IO14",
+        "x": 715.0,
+        "y": 195.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge419",
+        "number": "19",
+        "name": "IO15",
+        "x": 715.0,
+        "y": 205.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge420",
+        "number": "20",
+        "name": "IO16",
+        "x": 715.0,
+        "y": 215.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge421",
+        "number": "21",
+        "name": "IO17",
+        "x": 715.0,
+        "y": 225.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge422",
+        "number": "22",
+        "name": "IO18",
+        "x": 715.0,
+        "y": 235.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge423",
+        "number": "23",
+        "name": "IO19",
+        "x": 715.0,
+        "y": 245.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge424",
+        "number": "24",
+        "name": "IO20",
+        "x": 715.0,
+        "y": 255.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge425",
+        "number": "25",
+        "name": "IO21",
+        "x": 715.0,
+        "y": 265.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge426",
+        "number": "26",
+        "name": "IO26",
+        "x": 715.0,
+        "y": 275.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge427",
+        "number": "27",
+        "name": "IO47",
+        "x": 715.0,
+        "y": 285.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge428",
+        "number": "28",
+        "name": "IO33",
+        "x": 715.0,
+        "y": 295.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge429",
+        "number": "29",
+        "name": "IO34",
+        "x": 715.0,
+        "y": 305.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge430",
+        "number": "30",
+        "name": "IO48",
+        "x": 715.0,
+        "y": 315.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge431",
+        "number": "31",
+        "name": "IO35",
+        "x": 805.0,
+        "y": 315.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge432",
+        "number": "32",
+        "name": "IO36",
+        "x": 805.0,
+        "y": 305.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge433",
+        "number": "33",
+        "name": "IO37",
+        "x": 805.0,
+        "y": 295.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge434",
+        "number": "34",
+        "name": "IO38",
+        "x": 805.0,
+        "y": 285.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge435",
+        "number": "35",
+        "name": "IO39",
+        "x": 805.0,
+        "y": 275.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge436",
+        "number": "36",
+        "name": "IO40",
+        "x": 805.0,
+        "y": 265.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge437",
+        "number": "37",
+        "name": "IO41",
+        "x": 805.0,
+        "y": 255.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge438",
+        "number": "38",
+        "name": "IO42",
+        "x": 805.0,
+        "y": 245.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge439",
+        "number": "39",
+        "name": "TXD0",
+        "x": 805.0,
+        "y": 235.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge440",
+        "number": "40",
+        "name": "RXD0",
+        "x": 805.0,
+        "y": 225.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge441",
+        "number": "41",
+        "name": "IO45",
+        "x": 805.0,
+        "y": 215.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge442",
+        "number": "42",
+        "name": "GND",
+        "x": 805.0,
+        "y": 205.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge443",
+        "number": "43",
+        "name": "GND",
+        "x": 805.0,
+        "y": 195.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge444",
+        "number": "44",
+        "name": "IO46",
+        "x": 805.0,
+        "y": 185.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge445",
+        "number": "45",
+        "name": "EN",
+        "x": 805.0,
+        "y": 175.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge446",
+        "number": "46",
+        "name": "GND",
+        "x": 805.0,
+        "y": 165.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge447",
+        "number": "47",
+        "name": "GND",
+        "x": 805.0,
+        "y": 155.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge448",
+        "number": "48",
+        "name": "GND",
+        "x": 805.0,
+        "y": 145.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge449",
+        "number": "49",
+        "name": "GND",
+        "x": 805.0,
+        "y": 135.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge450",
+        "number": "50",
+        "name": "GND",
+        "x": 805.0,
+        "y": 125.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge451",
+        "number": "51",
+        "name": "GND",
+        "x": 805.0,
+        "y": 115.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge452",
+        "number": "52",
+        "name": "GND",
+        "x": 805.0,
+        "y": 105.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge453",
+        "number": "53",
+        "name": "GND",
+        "x": 805.0,
+        "y": 95.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge454",
+        "number": "54",
+        "name": "GND",
+        "x": 805.0,
+        "y": 85.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge455",
+        "number": "55",
+        "name": "GND",
+        "x": 805.0,
+        "y": 75.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge456",
+        "number": "56",
+        "name": "GND",
+        "x": 805.0,
+        "y": 65.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge457",
+        "number": "57",
+        "name": "GND",
+        "x": 805.0,
+        "y": 55.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge458",
+        "number": "58",
+        "name": "GND",
+        "x": 805.0,
+        "y": 45.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge459",
+        "number": "59",
+        "name": "GND",
+        "x": 805.0,
+        "y": 35.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge460",
+        "number": "60",
+        "name": "GND",
+        "x": 805.0,
+        "y": 25.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge464",
+        "number": "GND",
+        "name": "GND",
+        "x": 760.0,
+        "y": 5.0,
+        "rotation": 90
+      }
+    ],
+    "J_USB": [
+      {
+        "gid": "gge303",
+        "number": "A1B12",
+        "name": "GND",
+        "x": 65.0,
+        "y": -405.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge324",
+        "number": "A4B9",
+        "name": "VBUS",
+        "x": 65.0,
+        "y": -395.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge345",
+        "number": "B8",
+        "name": "SBU2",
+        "x": 65.0,
+        "y": -385.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge366",
+        "number": "A5",
+        "name": "CC1",
+        "x": 65.0,
+        "y": -375.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge387",
+        "number": "B7",
+        "name": "DN2",
+        "x": 65.0,
+        "y": -365.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge408",
+        "number": "A6",
+        "name": "DP1",
+        "x": 65.0,
+        "y": -355.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge15673",
+        "number": "A7",
+        "name": "DN1",
+        "x": 65.0,
+        "y": -345.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge15694",
+        "number": "B6",
+        "name": "DP2",
+        "x": 65.0,
+        "y": -335.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge471",
+        "number": "A8",
+        "name": "SBU1",
+        "x": 65.0,
+        "y": -325.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge492",
+        "number": "B5",
+        "name": "CC2",
+        "x": 65.0,
+        "y": -315.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge513",
+        "number": "B4A9",
+        "name": "VBUS",
+        "x": 65.0,
+        "y": -305.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge534",
+        "number": "B1A12",
+        "name": "GND",
+        "x": 65.0,
+        "y": -295.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge555",
+        "number": "4",
+        "name": "EH",
+        "x": 135.0,
+        "y": -325.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge576",
+        "number": "3",
+        "name": "EH",
+        "x": 135.0,
+        "y": -315.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge597",
+        "number": "2",
+        "name": "EH",
+        "x": 135.0,
+        "y": -305.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge618",
+        "number": "1",
+        "name": "EH",
+        "x": 135.0,
+        "y": -295.0,
+        "rotation": 0
+      }
+    ],
+    "D_VBUS": [
+      {
+        "gid": "gge110",
+        "number": "2",
+        "name": "2",
+        "x": 290.0,
+        "y": -500.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge131",
+        "number": "1",
+        "name": "1",
+        "x": 250.0,
+        "y": -500.0,
+        "rotation": 180
+      }
+    ],
+    "F_VBUS": [
+      {
+        "gid": "gge15931",
+        "number": "1",
+        "name": "1",
+        "x": 380.0,
+        "y": -500.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge15952",
+        "number": "2",
+        "name": "2",
+        "x": 420.0,
+        "y": -500.0,
+        "rotation": 0
+      }
+    ],
+    "U_3V3": [
+      {
+        "gid": "gge5",
+        "number": "1",
+        "name": "VIN",
+        "x": 540.0,
+        "y": -220.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge16009",
+        "number": "2",
+        "name": "GND",
+        "x": 540.0,
+        "y": -210.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge21",
+        "number": "3",
+        "name": "EN",
+        "x": 540.0,
+        "y": -200.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge28",
+        "number": "4",
+        "name": "NC",
+        "x": 640.0,
+        "y": -200.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge35",
+        "number": "5",
+        "name": "VOUT",
+        "x": 640.0,
+        "y": -220.0,
+        "rotation": 0
+      }
+    ],
+    "U_LEVEL": [
+      {
+        "gid": "gge16108",
+        "number": "1",
+        "name": "#OE",
+        "x": 750.0,
+        "y": 540.0,
+        "rotation": 270
+      },
+      {
+        "gid": "gge6",
+        "number": "2",
+        "name": "A",
+        "x": 760.0,
+        "y": 540.0,
+        "rotation": 270
+      },
+      {
+        "gid": "gge16147",
+        "number": "3",
+        "name": "GND",
+        "x": 770.0,
+        "y": 540.0,
+        "rotation": 270
+      },
+      {
+        "gid": "gge8",
+        "number": "4",
+        "name": "Y",
+        "x": 770.0,
+        "y": 460.0,
+        "rotation": 90
+      },
+      {
+        "gid": "gge9",
+        "number": "5",
+        "name": "VCC",
+        "x": 750.0,
+        "y": 460.0,
+        "rotation": 90
+      }
+    ],
+    "J_LED": [
+      {
+        "gid": "gge16228",
+        "number": "1",
+        "name": "1",
+        "x": 1005.0,
+        "y": 490.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge16249",
+        "number": "2",
+        "name": "2",
+        "x": 1005.0,
+        "y": 500.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge16270",
+        "number": "3",
+        "name": "3",
+        "x": 1005.0,
+        "y": 510.0,
+        "rotation": 180
+      }
+    ],
+    "R_CC1": [
+      {
+        "gid": "rep2",
+        "number": "2",
+        "name": "2",
+        "x": 120.0,
+        "y": -190.0,
+        "rotation": 0
+      },
+      {
+        "gid": "rep3",
+        "number": "1",
+        "name": "1",
+        "x": 80.0,
+        "y": -190.0,
+        "rotation": 180
+      }
+    ],
+    "R_CC2": [
+      {
+        "gid": "rep1",
+        "number": "2",
+        "name": "2",
+        "x": 200.0,
+        "y": -190.0,
+        "rotation": 0
+      },
+      {
+        "gid": "rep5",
+        "number": "1",
+        "name": "1",
+        "x": 160.0,
+        "y": -190.0,
+        "rotation": 180
+      }
+    ],
+    "R_EN": [
+      {
+        "gid": "rep7",
+        "number": "2",
+        "name": "2",
+        "x": 640.0,
+        "y": 100.0,
+        "rotation": 0
+      },
+      {
+        "gid": "rep8",
+        "number": "1",
+        "name": "1",
+        "x": 600.0,
+        "y": 100.0,
+        "rotation": 180
+      }
+    ],
+    "C_EN": [
+      {
+        "gid": "gge16474",
+        "number": "1",
+        "name": "1",
+        "x": 600.0,
+        "y": 150.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge16498",
+        "number": "2",
+        "name": "2",
+        "x": 640.0,
+        "y": 150.0,
+        "rotation": 0
+      }
+    ],
+    "R_BOOT": [
+      {
+        "gid": "rep10",
+        "number": "2",
+        "name": "2",
+        "x": 640.0,
+        "y": 230.0,
+        "rotation": 0
+      },
+      {
+        "gid": "rep11",
+        "number": "1",
+        "name": "1",
+        "x": 600.0,
+        "y": 230.0,
+        "rotation": 180
+      }
+    ],
+    "R_LEVEL_PD": [
+      {
+        "gid": "gge16597",
+        "number": "2",
+        "name": "2",
+        "x": 780.0,
+        "y": 620.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge16618",
+        "number": "1",
+        "name": "1",
+        "x": 740.0,
+        "y": 620.0,
+        "rotation": 180
+      }
+    ],
+    "R_DATA": [
+      {
+        "gid": "rep13",
+        "number": "2",
+        "name": "2",
+        "x": 900.0,
+        "y": 500.0,
+        "rotation": 0
+      },
+      {
+        "gid": "rep14",
+        "number": "1",
+        "name": "1",
+        "x": 860.0,
+        "y": 500.0,
+        "rotation": 180
+      }
+    ],
+    "C_LEVEL": [
+      {
+        "gid": "gge16714",
+        "number": "1",
+        "name": "1",
+        "x": 680.0,
+        "y": 500.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge16738",
+        "number": "2",
+        "name": "2",
+        "x": 720.0,
+        "y": 500.0,
+        "rotation": 0
+      }
+    ],
+    "C_VBUS_IN": [
+      {
+        "gid": "gge17",
+        "number": "2",
+        "name": "2",
+        "x": 490.0,
+        "y": -430.0,
+        "rotation": 0
+      },
+      {
+        "gid": "gge16801",
+        "number": "1",
+        "name": "1",
+        "x": 450.0,
+        "y": -430.0,
+        "rotation": 180
+      }
+    ],
+    "C_3V3_OUT1": [
+      {
+        "gid": "gge16843",
+        "number": "1",
+        "name": "1",
+        "x": 740.0,
+        "y": -250.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge16870",
+        "number": "2",
+        "name": "2",
+        "x": 780.0,
+        "y": -250.0,
+        "rotation": 0
+      }
+    ],
+    "C_ESP_DEC": [
+      {
+        "gid": "gge16915",
+        "number": "1",
+        "name": "1",
+        "x": 730.0,
+        "y": 50.0,
+        "rotation": 180
+      },
+      {
+        "gid": "gge16942",
+        "number": "2",
+        "name": "2",
+        "x": 770.0,
+        "y": 50.0,
+        "rotation": 0
+      }
+    ],
+    "TP_5V": [
+      {
+        "gid": "gge16987",
+        "number": "1",
+        "name": "1",
+        "x": 430.0,
+        "y": 410.0,
+        "rotation": 90
+      }
+    ],
+    "TP_GND": [
+      {
+        "gid": "gge17029",
+        "number": "1",
+        "name": "1",
+        "x": 500.0,
+        "y": 410.0,
+        "rotation": 90
+      }
+    ],
+    "TP_TX": [
+      {
+        "gid": "gge17071",
+        "number": "1",
+        "name": "1",
+        "x": 570.0,
+        "y": 410.0,
+        "rotation": 90
+      }
+    ],
+    "TP_RX": [
+      {
+        "gid": "gge17113",
+        "number": "1",
+        "name": "1",
+        "x": 430.0,
+        "y": 480.0,
+        "rotation": 90
+      }
+    ],
+    "TP_EN": [
+      {
+        "gid": "gge17155",
+        "number": "1",
+        "name": "1",
+        "x": 500.0,
+        "y": 480.0,
+        "rotation": 90
+      }
+    ],
+    "TP_BOOT": [
+      {
+        "gid": "gge17197",
+        "number": "1",
+        "name": "1",
+        "x": 570.0,
+        "y": 480.0,
+        "rotation": 90
+      }
+    ]
+  }
+}
