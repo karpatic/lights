@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ESP32 Code Uploader</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        #output { height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; background-color: #f5f5f5; font-family: monospace; }
+        button { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        button:hover { background-color: #45a049; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        select, textarea { width: 100%; padding: 8px; margin: 10px 0; box-sizing: border-box; }
+        textarea { height: 200px; font-family: monospace; }
+        .preset-section { margin: 10px 0; border: 1px solid #ddd; padding: 10px; background-color: #f9f9f9; }
+        .progress-bar {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: none;
+        }
+        .progress {
+            height: 20px;
+            background-color: #4CAF50;
+            border-radius: 4px;
+            text-align: center;
+            color: white;
+            line-height: 20px;
+            width: 0%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ESP32 Code Uploader</h1>
+        
+        <div>
+            <button id="connectBtn">Connect to Device</button>
+            <button id="disconnectBtn" disabled>Disconnect</button>
+            <span id="connectionStatus">Not connected</span>
+        </div>
+        
+        <div class="preset-section">
+            <h2>Preset Examples:</h2>
+            <select id="presetSelect">
+                <option value="">-- Select an example --</option>
+                <option value="blinkCounter">Blink with Counter</option>
+                <option value="rgbLed">RGB LED Control</option>
+            </select>
+            <button id="loadPresetBtn">Load Example</button>
+        </div>
+        
+        <div>
+            <h2>Code:</h2>
+            <textarea id="codeArea" placeholder="Enter your Arduino code here"></textarea>
+            <button id="uploadBtn" disabled>Upload Code</button>
+            <button id="loadFileBtn">Load from File</button>
+            <input type="file" id="fileInput" style="display: none;">
+            <div class="progress-bar" id="uploadProgress">
+                <div class="progress" id="progressBar">0%</div>
+            </div>
+        </div>
+        
+        <div>
+            <h2>Output:</h2>
+            <div id="output"></div>
+        </div>
+    </div>
+    
+    <script src="web.js" type="module"></script>
+</body>
+</html>

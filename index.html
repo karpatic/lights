@@ -3,187 +3,286 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lights Notebook Viewer</title>
+    <title>Lights Project State</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script
       type="module"
       src="https://cdn.jsdelivr.net/npm/ipynb2web@latest/dist/ipynb2web.browser.mjs"
     ></script>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="./index.css">
   </head>
   <body>
+    <script type="application/json" id="route-map">
+      [
+        { "path": "/", "notebook": "./ipynb/index.ipynb", "label": "Project State" },
+        { "path": "/hardware.html", "notebook": "./ipynb/board_design.ipynb", "label": "Hardware" },
+        { "path": "/firmware.html", "notebook": "./ipynb/esp32.ipynb", "label": "Firmware" },
+        { "path": "/browser.html", "notebook": "./ipynb/web.ipynb", "label": "Browser Control" },
+        { "path": "/flashing.html", "notebook": "./ipynb/upload.ipynb", "label": "Flashing Status" },
+        { "path": "/leds.html", "notebook": "./ipynb/lights.ipynb", "label": "LED/Power Notes" },
+        { "path": "/next-steps.html", "notebook": "./ipynb/plan.ipynb", "label": "Next Steps" },
+        { "path": "/architecture.html", "notebook": "./ipynb/diagrams.ipynb", "label": "Architecture" },
+        { "path": "/audio.html", "notebook": "./ipynb/audio.ipynb", "label": "Audio" },
+        { "path": "/compliance.html", "notebook": "./ipynb/licensing.ipynb", "label": "Compliance" }
+      ]
+    </script>
+    <script type="application/json" id="route-aliases">
+      {
+        "/index.html": "/",
+        "/board_designs.html": "/hardware.html",
+        "/esp32.html": "/firmware.html",
+        "/web.html": "/browser.html",
+        "/upload.html": "/flashing.html",
+        "/lights.html": "/leds.html",
+        "/plan.html": "/next-steps.html",
+        "/diagrams.html": "/architecture.html",
+        "/licensing.html": "/compliance.html"
+      }
+    </script>
+    <nav class="main-nav" id="mainNav" aria-label="Project navigation"></nav>
     <div id="content"></div>
     <script type="module">
-      // Notebook path mapping
-      const notebookPaths = {
-        '/': './ipynb/index.ipynb',
-        '/index.html': './ipynb/index.ipynb', 
-        '/audio.html': './ipynb/audio.ipynb',
-        '/board_designs.html': './ipynb/board_design.ipynb',
-        '/esp32.html': './ipynb/esp32.ipynb',
-        '/esp_idf.html': './ipynb/esp_idf.ipynb',
-        '/esp_now.html': './ipynb/esp_now.ipynb',
-        '/licensing.html': './ipynb/licensing.ipynb',
-        '/lights.html': './ipynb/lights.ipynb',
-        '/plan.html': './ipynb/plan.ipynb',
-        '/upload.html': './ipynb/upload.ipynb', 
-        '/web.html': './ipynb/web.ipynb',
-        '/wled.html': './ipynb/wled.ipynb',
-      };
+      const routeMap = JSON.parse(document.getElementById('route-map').textContent);
+      const routeAliases = JSON.parse(document.getElementById('route-aliases').textContent);
+      const routesByPath = new Map(routeMap.map((route) => [route.path, route]));
 
-      // Function to execute scripts in content
+      function normalizeRoutePath(path) {
+        if (!path || path === '#') {
+          return '/';
+        }
+
+        let normalized = path.trim();
+        if (normalized.startsWith('#')) {
+          normalized = normalized.slice(1);
+        }
+
+        if (!normalized || normalized === '/') {
+          return '/';
+        }
+
+        if (!normalized.startsWith('/')) {
+          normalized = `/${normalized}`;
+        }
+
+        if (!normalized.includes('.')) {
+          normalized = `${normalized}.html`;
+        }
+
+        return routeAliases[normalized] || normalized;
+      }
+
+      function routeHash(path) {
+        return path === '/' ? '#/' : `#${path.replace(/\.html$/, '')}`;
+      }
+
+      function pageNameFor(path) {
+        if (path === '/') {
+          return 'Project State';
+        }
+
+        const route = routesByPath.get(path);
+        return route?.label || path.replace(/^\//, '').replace(/\.html$/, '');
+      }
+
+      function notebookMarkdown(notebook) {
+        return (notebook.cells || [])
+          .filter((cell) => cell.cell_type === 'markdown')
+          .flatMap((cell) => Array.isArray(cell.source) ? cell.source : [cell.source || ''])
+          .join('');
+      }
+
+      function titleFromMarkdown(markdown, fallbackTitle) {
+        const match = markdown.match(/^#\s+(.+)$/m);
+        return match ? match[1].trim() : fallbackTitle;
+      }
+
+      function stripNotebookTitle(markdown) {
+        return markdown
+          .replace(/^#\s+.+\n+/, '')
+          .replace(/^>\s+.+\n+/, '')
+          .replace(/^\s*-\s+keywords:\s*\[[^\n]+\]\n+/m, '')
+          .trimStart();
+      }
+
+      function getPathFromHash() {
+        return normalizeRoutePath(window.location.hash || '#/');
+      }
+
+      function routeFromPath(path) {
+        const normalized = normalizeRoutePath(path);
+        const route = routesByPath.get(normalized);
+        return route ? { ...route, path: normalized } : null;
+      }
+
+      function renderNav() {
+        const nav = document.getElementById('mainNav');
+        const list = document.createElement('ul');
+
+        routeMap.forEach((route) => {
+          const item = document.createElement('li');
+          const link = document.createElement('a');
+          link.href = routeHash(route.path);
+          link.textContent = route.label;
+          link.dataset.route = route.path;
+          item.appendChild(link);
+          list.appendChild(item);
+        });
+
+        nav.replaceChildren(list);
+      }
+
       function executeScripts(element) {
-        // Get all script elements
         const scripts = element.querySelectorAll('script');
-        scripts.forEach(oldScript => {
-          // Create a new script element
+        scripts.forEach((oldScript) => {
           const newScript = document.createElement('script');
-          
-          // Copy all attributes from the old script to the new one
-          Array.from(oldScript.attributes).forEach(attr => {
+
+          Array.from(oldScript.attributes).forEach((attr) => {
             newScript.setAttribute(attr.name, attr.value);
           });
-          
-          // Set the content of the new script
+
           newScript.textContent = oldScript.textContent;
-          
-          // Replace the old script with the new one
           oldScript.parentNode.replaceChild(newScript, oldScript);
         });
       }
 
-      // Function to load notebook content
-      async function loadNotebook(notebookPath) {
-        const contentDiv = document.getElementById("content");
+      async function loadNotebook(route) {
+        const contentDiv = document.getElementById('content');
         contentDiv.innerHTML = '<div class="loading">Loading notebook...</div>';
-        
+
         try {
-          const meta = await ipynb2web.nb2json(notebookPath);
-          console.log("Loaded notebook:", notebookPath, meta);
-          
-          // Create the header with metadata
-          let headerHTML = '';
-          if (meta && meta.meta) {
-            // Extract page title - use filename if title is not available
-            const pageTitle = meta.meta.title || meta.meta.filename.replace('.ipynb', '') || 'Notebook';
-            
-            // Get current path from URL or stored data attribute
-            const currentPath = document.body.dataset.currentNotebook || '/';
-            const pageName = currentPath.split('/').pop().replace('.html', '');
-            
-            // Format the header title
-            const headerTitle = pageName === '' || pageName === 'index' 
-              ? pageTitle 
-              : `${pageTitle}`;
-            
-            // Get description
-            const description = meta.meta.summary || '';
-            
-            // Create breadcrumb navigation
-            const breadcrumb = pageName === '' || pageName === 'index'
-              ? '<div class="breadcrumb">Home</div>'
-              : `<div class="breadcrumb"><a href="/">Home</a> &raquo; ${pageName.charAt(0).toUpperCase() + pageName.slice(1)}</div>`;
-            
-            headerHTML = `
-              <div class="page-header">
-                ${breadcrumb}
-                <h1>${headerTitle}</h1>
-                ${description ? `<p class="description">${description}</p>` : ''}
-              </div>
-            `;
+          const meta = await ipynb2web.nb2json(route.notebook);
+          console.log('Loaded notebook:', route.notebook, meta);
+
+          let notebookBody = meta.content || '';
+          let markdownTitle = '';
+          if (!notebookBody) {
+            const response = await fetch(route.notebook);
+            if (!response.ok) {
+              throw new Error(`Unable to fetch notebook JSON (${response.status})`);
+            }
+            const notebook = await response.json();
+            const markdown = notebookMarkdown(notebook);
+            markdownTitle = titleFromMarkdown(markdown, route.label || 'Notebook');
+            notebookBody = marked.parse(stripNotebookTitle(markdown));
           }
-          
-          // Insert the header and content
-          contentDiv.innerHTML = headerHTML + meta.content;
-          
-          // Execute any scripts in the content
+
+          const metaInfo = meta?.meta || {};
+          const fallbackTitle = route.label || 'Notebook';
+          const pageTitle = markdownTitle || (metaInfo.title && !metaInfo.title.startsWith('#') ? metaInfo.title : fallbackTitle);
+          const description = metaInfo.summary || '';
+          const breadcrumb = route.path === '/'
+            ? '<div class="breadcrumb">Project State</div>'
+            : `<div class="breadcrumb"><a href="#/">Project State</a> &raquo; ${pageNameFor(route.path)}</div>`;
+
+          const headerHTML = `
+            <div class="page-header">
+              ${breadcrumb}
+              <h1>${pageTitle}</h1>
+              ${description ? `<p class="description">${description}</p>` : ''}
+            </div>
+          `;
+
+          contentDiv.innerHTML = headerHTML + notebookBody;
+          document.title = `${pageNameFor(route.path)} - Lights`;
+          document.body.dataset.currentNotebook = route.path;
           executeScripts(contentDiv);
         } catch (error) {
-          console.error("Error loading notebook:", error);
-          contentDiv.innerHTML = `<div class="error">Error loading notebook: ${notebookPath}<br>${error.message}</div>`;
+          console.error('Error loading notebook:', error);
+          contentDiv.innerHTML = `<div class="error">Error loading notebook: ${route.notebook}<br>${error.message}</div>`;
         }
       }
 
-      // Function to navigate to a path and update URL
-      function navigateToPath(path) {
-        if (!notebookPaths[path]) {
+      function showRouteNotFound(path) {
+        const contentDiv = document.getElementById('content');
+        contentDiv.innerHTML = `
+          <div class="page-header">
+            <div class="breadcrumb"><a href="#/">Project State</a></div>
+            <h1>Route Not Found</h1>
+            <p class="description">This page is not part of the current Lights site.</p>
+          </div>
+          <p>The requested route <code>${path}</code> is not active. Check <a href="#/">Project State</a> for current navigation.</p>
+        `;
+      }
+
+      function setActiveNav(path) {
+        document.querySelectorAll('.main-nav a').forEach((link) => {
+          link.classList.toggle('active', link.dataset.route === path);
+        });
+      }
+
+      function navigateToPath(path, updateHistory = true) {
+        const route = routeFromPath(path);
+        const normalizedPath = normalizeRoutePath(path);
+
+        if (!route) {
+          showRouteNotFound(normalizedPath);
           return false;
         }
 
-        document.body.dataset.currentNotebook = path;
-        // Update URL with hash - keep the leading / in hash
-        const hashPath = path === '/' ? '' : path.replace('.html', '');
-        window.history.pushState({ path: path }, '', hashPath ? `#${hashPath}` : '#');
-        loadNotebook(notebookPaths[path]);
-        // Scroll to top when navigating
+        if (updateHistory && window.location.hash !== routeHash(route.path)) {
+          window.history.pushState({ path: route.path }, '', routeHash(route.path));
+        }
+
+        setActiveNav(route.path);
+        loadNotebook(route);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return true;
       }
 
-      // Function to intercept all link clicks
+      function pathFromLink(link) {
+        const href = link.getAttribute('href');
+        if (!href) {
+          return null;
+        }
+
+        if (href.startsWith('#')) {
+          return normalizeRoutePath(href);
+        }
+
+        if (href.startsWith('/')) {
+          return normalizeRoutePath(href);
+        }
+
+        return null;
+      }
+
       function interceptLinks() {
-        // Add click event to document to catch all anchor clicks
-        document.addEventListener('click', function(e) {
-          // Check if clicked element is an anchor tag or inside one
-          const link = e.target.closest('a');
-          if (!link) return;
-          
-          const href = link.getAttribute('href');
-          
-          // Only intercept links that start with "/" (internal links)
-          if (href && href.startsWith('/')) {
-            let path = href;
-            
-            // Handle paths without .html extension
-            if (!path.includes('.') && path !== '/') {
-              path = `${path}.html`;
-            }
-            
-            // Only hijack notebook routes. Real HTML pages should open normally.
-            if (notebookPaths[path]) {
-              e.preventDefault();
-              navigateToPath(path);
-            }
+        document.addEventListener('click', (event) => {
+          const link = event.target.closest('a');
+          if (!link) {
+            return;
           }
-          // External links and other links will work normally
+
+          const path = pathFromLink(link);
+          if (!path || !routeFromPath(path)) {
+            return;
+          }
+
+          event.preventDefault();
+          navigateToPath(path);
         });
       }
 
-      // Handle popstate events (browser back/forward) and hash changes
-      window.addEventListener('popstate', function(e) {
-        const path = e.state?.path || getPathFromHash();
-        const notebookPath = notebookPaths[path] || notebookPaths['/'];
-        document.body.dataset.currentNotebook = path;
-        loadNotebook(notebookPath);
-        // Scroll to top when using browser navigation
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.addEventListener('popstate', (event) => {
+        const path = event.state?.path || getPathFromHash();
+        navigateToPath(path, false);
       });
 
-      // Function to get path from current hash
-      function getPathFromHash() {
-        const hash = window.location.hash.substring(1); // Remove #
-        if (!hash) return '/';
-        
-        // Handle hash paths that start with / (like #/audio)
-        if (hash.startsWith('/')) {
-          return hash.includes('.') ? hash : `${hash}.html`;
+      window.addEventListener('hashchange', () => {
+        const path = getPathFromHash();
+        if (document.body.dataset.currentNotebook !== normalizeRoutePath(path)) {
+          navigateToPath(path, false);
         }
-        
-        // Handle hash paths without leading / (like #audio)
-        return hash.includes('.') ? `/${hash}` : `/${hash}.html`;
-      }
+      });
 
-      // Initial load based on current hash
       function loadInitialContent() {
         const path = getPathFromHash();
-        const notebookPath = notebookPaths[path] || notebookPaths['/'];
-        document.body.dataset.currentNotebook = path;
-        // Set initial state
-        window.history.replaceState({ path: path }, '', window.location.hash || '#');
-        loadNotebook(notebookPath);
+        window.history.replaceState({ path: normalizeRoutePath(path) }, '', window.location.hash || '#/');
+        navigateToPath(path, false);
       }
 
-      // Start the app
+      renderNav();
       interceptLinks();
       loadInitialContent();
     </script>

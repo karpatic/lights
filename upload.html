@@ -1,72 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>ESP32 Code Uploader</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        #output { height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; background-color: #f5f5f5; font-family: monospace; }
-        button { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
-        button:hover { background-color: #45a049; }
-        button:disabled { background-color: #cccccc; cursor: not-allowed; }
-        select, textarea { width: 100%; padding: 8px; margin: 10px 0; box-sizing: border-box; }
-        textarea { height: 200px; font-family: monospace; }
-        .preset-section { margin: 10px 0; border: 1px solid #ddd; padding: 10px; background-color: #f9f9f9; }
-        .progress-bar {
-            width: 100%;
-            background-color: #ddd;
-            border-radius: 4px;
-            margin-top: 10px;
-            display: none;
-        }
-        .progress {
-            height: 20px;
-            background-color: #4CAF50;
-            border-radius: 4px;
-            text-align: center;
-            color: white;
-            line-height: 20px;
-            width: 0%;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lights Flashing Status</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./index.css">
 </head>
 <body>
-    <div class="container">
-        <h1>ESP32 Code Uploader</h1>
-        
-        <div>
-            <button id="connectBtn">Connect to Device</button>
-            <button id="disconnectBtn" disabled>Disconnect</button>
-            <span id="connectionStatus">Not connected</span>
-        </div>
-        
-        <div class="preset-section">
-            <h2>Preset Examples:</h2>
-            <select id="presetSelect">
-                <option value="">-- Select an example --</option>
-                <option value="blinkCounter">Blink with Counter</option>
-                <option value="rgbLed">RGB LED Control</option>
-            </select>
-            <button id="loadPresetBtn">Load Example</button>
-        </div>
-        
-        <div>
-            <h2>Code:</h2>
-            <textarea id="codeArea" placeholder="Enter your Arduino code here"></textarea>
-            <button id="uploadBtn" disabled>Upload Code</button>
-            <button id="loadFileBtn">Load from File</button>
-            <input type="file" id="fileInput" style="display: none;">
-            <div class="progress-bar" id="uploadProgress">
-                <div class="progress" id="progressBar">0%</div>
-            </div>
-        </div>
-        
-        <div>
-            <h2>Output:</h2>
-            <div id="output"></div>
-        </div>
+  <main id="content">
+    <div class="page-header">
+      <div class="breadcrumb"><a href="./index.html#/">Project State</a></div>
+      <h1>Flashing Status</h1>
+      <p class="description">Browser firmware upload is not currently supported.</p>
     </div>
-    
-    <script src="web.js" type="module"></script>
+    <section>
+      <h2>Current Path</h2>
+      <p>Use PlatformIO outside the website for firmware builds and uploads. The current firmware still targets generic <code>esp32dev</code> and is not a V2 release image.</p>
+      <pre><code>pio run
+pio run --target upload</code></pre>
+      <p>Serial adapter paths vary by host and fixture. Do not treat archived <code>/dev/ttyUSB0</code>, <code>/dev/ttyUSB1</code>, CP2102, or COM-port logs as production instructions.</p>
+    </section>
+    <section>
+      <h2>Retired Browser Upload</h2>
+      <p>The old Web Serial upload experiment expected custom <code>CMD:*</code> messages that the current firmware does not implement. Its files are preserved under <a href="./archive/browser-upload/2026-07-30/">archive/browser-upload/2026-07-30/</a> for historical reference.</p>
+      <p>Continue in the notebook site at <a href="./index.html#/flashing">Flashing Status</a>.</p>
+    </section>
+  </main>
 </body>
 </html>

@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LED Lights Controller</title>
+  <title>Lights BLE Controller</title>
   <script> window.w=window</script>
+  <link rel="icon" href="data:,">
   <style> 
   </style>
   <link rel="stylesheet" href="./bt.css">
@@ -12,13 +13,13 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>LED Controller</h1>
-      <p>Control your smart LED strips with precision and style</p>
+      <h1>Lights BLE Controller</h1>
+      <p>Legacy-compatible control surface for already-flashed firmware</p>
     </div>
 
     <div class="connect-card" id="connectCard">
-      <h2>Connect to Your LED Strip</h2>
-      <p>Establish a Bluetooth connection to start controlling your lights</p>
+      <h2>Connect to Music Strip</h2>
+      <p>This page does not flash firmware and is not a V2 release app.</p>
       <button class="connect-btn" id="btConnect" onclick="window.ble()">
         Connect via Bluetooth
         <span class="status-indicator" id="statusIndicator"></span>
@@ -127,15 +128,16 @@
       </div>
 
       <div class="card">
-        <h3>Hardware Configuration</h3>
+        <h3>Legacy Firmware Parameters</h3>
+        <p class="control-note">These defaults reflect the current legacy firmware/browser payload. V2 hardware targets GPIO18, and real current limiting is still a blocker.</p>
         <div class="settings-grid">
           <div class="control-group">
             <label for="ledCount">LED Count</label>
-            <input type="number" class="number-input" min="5" max="400" step="5" id="ledCount" value="300"/>
+            <input type="number" class="number-input" min="1" max="1000" step="5" id="ledCount" value="300"/>
           </div>
           <div class="control-group">
             <label for="pixelPin">Pixel Pin</label>
-            <input type="number" class="number-input" min="0" max="33" id="pixelPin" value="15"/>
+            <input type="number" class="number-input" min="0" max="48" id="pixelPin" value="15"/>
           </div>
           <div class="control-group">
             <label for="colorOrder">Color Order</label>
@@ -149,8 +151,8 @@
             </select>
           </div>
           <div class="control-group">
-            <label for="maxCurrent">Max Current (mA)</label>
-            <input type="number" class="number-input" min="500" max="20000" step="100" id="maxCurrent" value="8000"/>
+            <label for="maxCurrent">Current Metadata (mA)</label>
+            <input type="number" class="number-input" min="0" max="50000" step="100" id="maxCurrent" value="8000"/>
           </div>
         </div>
       </div>
