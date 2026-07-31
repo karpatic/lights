@@ -33,13 +33,13 @@
 <body>
     <div class="container">
         <h1>ESP32 Code Uploader</h1>
-        
+
         <div>
             <button id="connectBtn">Connect to Device</button>
             <button id="disconnectBtn" disabled>Disconnect</button>
             <span id="connectionStatus">Not connected</span>
         </div>
-        
+
         <div class="preset-section">
             <h2>Preset Examples:</h2>
             <select id="presetSelect">
@@ -49,7 +49,7 @@
             </select>
             <button id="loadPresetBtn">Load Example</button>
         </div>
-        
+
         <div>
             <h2>Code:</h2>
             <textarea id="codeArea" placeholder="Enter your Arduino code here"></textarea>
@@ -60,13 +60,13 @@
                 <div class="progress" id="progressBar">0%</div>
             </div>
         </div>
-        
+
         <div>
             <h2>Output:</h2>
             <div id="output"></div>
         </div>
     </div>
-    
+
     <script src="web.js" type="module"></script>
 </body>
 </html>
