@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lights Project State</title>
+    <title>Lights Notebook Viewer</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script
       type="module"
@@ -15,32 +15,38 @@
   <body>
     <script type="application/json" id="route-map">
       [
-        { "path": "/", "notebook": "./ipynb/index.ipynb", "label": "Project State" },
-        { "path": "/hardware.html", "notebook": "./ipynb/board_design.ipynb", "label": "Hardware" },
-        { "path": "/firmware.html", "notebook": "./ipynb/esp32.ipynb", "label": "Firmware" },
-        { "path": "/browser.html", "notebook": "./ipynb/web.ipynb", "label": "Browser Control" },
-        { "path": "/flashing.html", "notebook": "./ipynb/upload.ipynb", "label": "Flashing Status" },
-        { "path": "/leds.html", "notebook": "./ipynb/lights.ipynb", "label": "LED/Power Notes" },
-        { "path": "/next-steps.html", "notebook": "./ipynb/plan.ipynb", "label": "Next Steps" },
-        { "path": "/architecture.html", "notebook": "./ipynb/diagrams.ipynb", "label": "Architecture" },
-        { "path": "/audio.html", "notebook": "./ipynb/audio.ipynb", "label": "Audio" },
-        { "path": "/compliance.html", "notebook": "./ipynb/licensing.ipynb", "label": "Compliance" }
+        { "path": "/", "notebook": "./ipynb/index.ipynb", "label": "Lights" },
+        { "path": "/lights.html", "notebook": "./ipynb/lights.ipynb", "label": "LEDs" },
+        { "path": "/audio.html", "notebook": "./ipynb/audio.ipynb", "label": "Sound" },
+        { "path": "/web.html", "notebook": "./ipynb/web.ipynb", "label": "Web" },
+        { "path": "/upload.html", "notebook": "./ipynb/upload.ipynb", "label": "Upload" },
+        { "path": "/wled.html", "notebook": "./ipynb/wled.ipynb", "label": "WLED" },
+        { "path": "/esp32.html", "notebook": "./ipynb/esp32.ipynb", "label": "ESP32" },
+        { "path": "/plan.html", "notebook": "./ipynb/plan.ipynb", "label": "Plan" },
+        { "path": "/board_designs.html", "notebook": "./ipynb/board_design.ipynb", "label": "Board Designs" },
+        { "path": "/diagrams.html", "notebook": "./ipynb/diagrams.ipynb", "label": "Diagrams" },
+        { "path": "/licensing.html", "notebook": "./ipynb/licensing.ipynb", "label": "Licensing" }
       ]
     </script>
     <script type="application/json" id="route-aliases">
       {
         "/index.html": "/",
-        "/board_designs.html": "/hardware.html",
-        "/esp32.html": "/firmware.html",
-        "/web.html": "/browser.html",
-        "/upload.html": "/flashing.html",
-        "/lights.html": "/leds.html",
-        "/plan.html": "/next-steps.html",
-        "/diagrams.html": "/architecture.html",
-        "/licensing.html": "/compliance.html"
+        "/hardware.html": "/board_designs.html",
+        "/firmware.html": "/esp32.html",
+        "/browser.html": "/web.html",
+        "/flashing.html": "/upload.html",
+        "/leds.html": "/lights.html",
+        "/next-steps.html": "/plan.html",
+        "/architecture.html": "/diagrams.html",
+        "/compliance.html": "/licensing.html"
       }
     </script>
-    <nav class="main-nav" id="mainNav" aria-label="Project navigation"></nav>
+    <div class="nav-shell" id="navShell">
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="mainNav">
+        Menu
+      </button>
+      <nav class="main-nav" id="mainNav" aria-label="Notebook navigation"></nav>
+    </div>
     <div id="content"></div>
     <script type="module">
       const routeMap = JSON.parse(document.getElementById('route-map').textContent);
@@ -78,7 +84,7 @@
 
       function pageNameFor(path) {
         if (path === '/') {
-          return 'Project State';
+          return 'Lights';
         }
 
         const route = routesByPath.get(path);
@@ -132,6 +138,28 @@
         nav.replaceChildren(list);
       }
 
+      function setMobileNavOpen(open) {
+        const shell = document.getElementById('navShell');
+        const toggle = document.getElementById('navToggle');
+        shell.classList.toggle('nav-open', open);
+        toggle.setAttribute('aria-expanded', String(open));
+      }
+
+      function bindMobileNav() {
+        const nav = document.getElementById('mainNav');
+        const toggle = document.getElementById('navToggle');
+
+        toggle.addEventListener('click', () => {
+          setMobileNavOpen(toggle.getAttribute('aria-expanded') !== 'true');
+        });
+
+        nav.addEventListener('click', (event) => {
+          if (event.target.closest('a') && window.matchMedia('(max-width: 768px)').matches) {
+            setMobileNavOpen(false);
+          }
+        });
+      }
+
       function executeScripts(element) {
         const scripts = element.querySelectorAll('script');
         scripts.forEach((oldScript) => {
@@ -172,8 +200,8 @@
           const pageTitle = markdownTitle || (metaInfo.title && !metaInfo.title.startsWith('#') ? metaInfo.title : fallbackTitle);
           const description = metaInfo.summary || '';
           const breadcrumb = route.path === '/'
-            ? '<div class="breadcrumb">Project State</div>'
-            : `<div class="breadcrumb"><a href="#/">Project State</a> &raquo; ${pageNameFor(route.path)}</div>`;
+            ? '<div class="breadcrumb">Lights</div>'
+            : `<div class="breadcrumb"><a href="#/">Lights</a> &raquo; ${pageNameFor(route.path)}</div>`;
 
           const headerHTML = `
             <div class="page-header">
@@ -196,12 +224,12 @@
       function showRouteNotFound(path) {
         const contentDiv = document.getElementById('content');
         contentDiv.innerHTML = `
-          <div class="page-header">
-            <div class="breadcrumb"><a href="#/">Project State</a></div>
+            <div class="page-header">
+            <div class="breadcrumb"><a href="#/">Lights</a></div>
             <h1>Route Not Found</h1>
             <p class="description">This page is not part of the current Lights site.</p>
           </div>
-          <p>The requested route <code>${path}</code> is not active. Check <a href="#/">Project State</a> for current navigation.</p>
+          <p>The requested route <code>${path}</code> is not active. Check <a href="#/">Lights</a> for current navigation.</p>
         `;
       }
 
@@ -283,6 +311,7 @@
       }
 
       renderNav();
+      bindMobileNav();
       interceptLinks();
       loadInitialContent();
     </script>

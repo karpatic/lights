@@ -64,7 +64,7 @@
       h1, h2, h3, h4, h5, h6 {
         color: var(--text-primary);
         font-weight: 700;
-        letter-spacing: -0.025em;
+        letter-spacing: 0;
         margin-top: 2em;
         margin-bottom: 1em;
       }
@@ -264,15 +264,42 @@
       }
 
       /* Navigation styles */
-      .main-nav {
+      .nav-shell {
         background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
         box-shadow: var(--shadow-lg);
         position: sticky;
         top: 0;
         z-index: 100;
+      }
+
+      .nav-toggle {
+        display: none;
+        width: 100%;
+        border: 0;
+        background: transparent;
+        color: rgba(255,255,255,0.95);
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+        padding: 14px 18px;
+        text-align: left;
+      }
+
+      .nav-toggle::after {
+        content: '+';
+        float: right;
+        font-weight: 700;
+      }
+
+      .nav-toggle[aria-expanded="true"]::after {
+        content: '-';
+      }
+
+      .main-nav {
+        background: transparent;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
       }
 
       .main-nav ul {
@@ -446,6 +473,18 @@
         
         .main-nav ul {
           flex-direction: column;
+        }
+
+        .nav-toggle {
+          display: block;
+        }
+
+        .main-nav {
+          display: none;
+        }
+
+        .nav-shell.nav-open .main-nav {
+          display: flex;
         }
         
         .main-nav li {

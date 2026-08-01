@@ -183,14 +183,18 @@ for (const [alias, target] of Object.entries(aliases)) {
   }
 }
 
-for (const required of ['PROJECT_STATE.md', 'README.md', 'bt.html', 'lights.js', 'upload.html', 'archive/README.md']) {
+for (const required of ['PROJECT_STATE.md', 'README.md', 'bt.html', 'lights.js', 'upload.html', 'web.js']) {
   if (!fileExists(required)) {
     fail(`Missing required file ${required}`);
   }
 }
 
-if (routeMap.some((route) => /wled|archive/i.test(`${route.path} ${route.notebook} ${route.label}`))) {
-  fail('Retired/archive content appears in active route map');
+if (!routePaths.has('/wled.html')) {
+  fail('Restored notebook route map must include /wled.html');
+}
+
+if (!routePaths.has('/upload.html')) {
+  fail('Restored notebook route map must include /upload.html');
 }
 
 if (errors.length) {

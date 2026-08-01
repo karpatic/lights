@@ -7,9 +7,9 @@
         
         // Code sample URLs
         const codeSampleURLs = {
-            blinkCounter: './samples/blink_serial.cpp',
-            blinkMonitor: './samples/blink_monitor.cpp', 
-            mainProject: './lightstrip/main.cpp' 
+            blinkCounter: './lightstrip/samples/blink_serial.cpp',
+            blinkMonitor: './lightstrip/samples/blink_monitor.cpp',
+            mainProject: './src/main.cpp'
         };
         
         // Function to fetch code samples from URLs

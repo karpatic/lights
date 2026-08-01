@@ -14,12 +14,12 @@
   <div class="container">
     <div class="header">
       <h1>Lights BLE Controller</h1>
-      <p>Legacy-compatible control surface for already-flashed firmware</p>
+      <p>Control the active music lighting firmware over Web Bluetooth</p>
     </div>
 
     <div class="connect-card" id="connectCard">
       <h2>Connect to Music Strip</h2>
-      <p>This page does not flash firmware and is not a V2 release app.</p>
+      <p>Sends JSON control payloads through the same client used by the notebook dashboard.</p>
       <button class="connect-btn" id="btConnect" onclick="window.ble()">
         Connect via Bluetooth
         <span class="status-indicator" id="statusIndicator"></span>
@@ -128,8 +128,8 @@
       </div>
 
       <div class="card">
-        <h3>Legacy Firmware Parameters</h3>
-        <p class="control-note">These defaults reflect the current legacy firmware/browser payload. V2 hardware targets GPIO18, and real current limiting is still a blocker.</p>
+        <h3>Firmware / Hardware Parameters</h3>
+        <p class="control-note">Current firmware defaults to GPIO15 while V2 hardware targets GPIO18. The current metadata is parsed by firmware, but real current limiting still needs implementation and validation.</p>
         <div class="settings-grid">
           <div class="control-group">
             <label for="ledCount">LED Count</label>
