@@ -1,0 +1,64 @@
+{
+  "verified_at": "2026-07-31T16:13:46-04:00",
+  "scope": "EasyEDA Standard live editor, persisted project JSON, deterministic router reruns, and close/reopen recovery",
+  "drc": {
+    "root": "DRC Errors (0)",
+    "categories": []
+  },
+  "live_counts": {
+    "footprints": 22,
+    "tracks": 61,
+    "vias": 38,
+    "copper_areas": 2,
+    "power_tracks": 38,
+    "signal_tracks": 22
+  },
+  "persisted_shape_counts": {
+    "LIB": 22,
+    "TRACK": 61,
+    "VIA": 38,
+    "COPPERAREA": 2
+  },
+  "geometry": {
+    "outline_mm": [18.0, 32.0],
+    "regulated_input": {
+      "physical_holes": 2,
+      "pitch_mm": 3.0,
+      "pad_diameter_mm": 2.2,
+      "finished_hole_diameter_mm": 1.2
+    },
+    "led_output_holes": 3,
+    "underside_pogo_pads": 6
+  },
+  "gnd_fill_islands_after_refill": {
+    "agent_v2_portrait_gnd_bottom_pour": 6,
+    "agent_v2_portrait_gnd_top_lower_pour": 5
+  },
+  "persistence": {
+    "hard_close_and_reopen_passed": true,
+    "reopened_counts": {
+      "footprints": 22,
+      "tracks": 61,
+      "vias": 38,
+      "copper_areas": 2
+    },
+    "editor_dirty_after_verification": false,
+    "note": "EasyEDA treats filled polygon arrays as derived cache. The deterministic signal router refilled both GND areas after reopen and DRC remained zero."
+  },
+  "router_idempotence": {
+    "power_static": {
+      "tracks": 38,
+      "areas": 2,
+      "planned_native_vias": 27
+    },
+    "signals_static": {
+      "tracks": 22,
+      "planned_native_vias": 11
+    },
+    "repeated_live_runs_stable": true
+  },
+  "sha256": {
+    "PCB_Compact ESP32-S3 USB LED Controller V2.json": "a3326c66e9de138977183ab30df09786af319b21666f444a2bdc949af816f366",
+    "Compact ESP32-S3 USB LED Controller V2.json": "27df80459ec5d21dc5c2ec8750bbc0896af71a948fbe9dfe25d518b0ae9abc9f"
+  }
+}

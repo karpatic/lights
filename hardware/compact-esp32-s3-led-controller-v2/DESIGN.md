@@ -1,10 +1,10 @@
 # Compact ESP32-S3 LED Controller V2 — design record
 
-Last reconciled: 2026-07-30
+Last reconciled: 2026-07-31
 
 Status: **design in progress; not fabrication-ready**
 
-Repository association: this controller is the hardware target for [`karpatic/lights`](https://github.com/karpatic/lights). The EasyEDA project and automation snapshot are backed up under [`snapshots/2026-07-30`](snapshots/2026-07-30/README.md).
+Repository association: this controller is the hardware target for [`karpatic/lights`](https://github.com/karpatic/lights). The proven routed baseline is backed up under [`snapshots/2026-07-31`](snapshots/2026-07-31/README.md). The later compact iteration and its placement concerns are documented in [`reviews/2026-07-31`](reviews/2026-07-31/README.md).
 
 ## Product goal
 
@@ -37,13 +37,17 @@ V1 proved the electrical concept but is larger and more complicated than necessa
 ### Active V2
 
 - EasyEDA Standard 6.5.51 project: `Compact ESP32-S3 USB LED Controller V2`;
-- working portrait target: approximately **18 × 32 mm**;
+- proven routed baseline: **18 × 32 mm**;
+- latest experimental compact iteration (preserved but mechanically rejected): **18 × 29 mm**;
 - two copper layers;
 - ESP32-S3-MINI-1-N8 with embedded antenna;
 - antenna at the head, circuitry corridor in the middle, cable/input landings at the foot;
-- active placement and routing remain unverified.
+- baseline: 22 footprints, 61 tracks, 38 vias, two GND copper areas, complete connectivity, zero EasyEDA DRC errors, and successful hard close/reopen verification;
+- compact experiment: 22 footprints, 60 tracks, 35 vias, two GND copper areas, 11/11 nets, and fresh zero-error DRC;
+- compact cable geometry: 2.00 mm pads, 1.20 mm finished holes, and aligned input/output GND-hole rows;
+- compact placement is not accepted because the vertical PPTC raw-input pad overlays the same-net 5 V input landing and crowds hand-solder access.
 
-The 18 × 32 mm dimensions are a placement/routing target, not a released mechanical specification.
+Neither outline is a released mechanical specification. The next pass must be connector-first and mechanically reviewed before rerouting.
 
 ## Target electrical architecture
 
@@ -77,7 +81,7 @@ Proposed landing:
 
 - two plated through-holes;
 - 3.00 mm pitch;
-- 2.20 mm copper pads;
+- 2.00 mm copper pads;
 - 1.20 mm finished holes;
 - regulated 5 V only.
 
@@ -101,24 +105,22 @@ Proposed landing:
 
 - three plated through-holes;
 - 3.00 mm pitch;
-- 2.20 mm copper pads;
+- 2.00 mm copper pads;
 - 1.20 mm finished holes;
 - hand-soldered, replaceable pigtail;
 - enclosure-provided strain relief.
 
 External-facing connector type, contact gender, wire colors, wire gauge, pin order, and mating orientation must be verified on the actual purchased pigtail before fabrication.
 
-## Connector decision and source lag
+## Connector decision and current source
 
 The preferred production direction is **no board-mounted USB-C connector**. It saves connector and anchor area, removes the two USB-C CC resistors, simplifies routing, permits arbitrary case-connector placement, and avoids exposing two simultaneous 5 V source paths.
 
-The 2026-07-30 backed-up EasyEDA source still contains:
+The active V2 implementation removes the board-mounted USB-C receptacle and both CC resistors. It uses the external regulated `5V_IN/GND` pigtail landing and preserves the TVS/PPTC protected-power topology. The 2026-07-30 snapshot remains historical transition evidence; the 2026-07-31 routed snapshot is the no-USB recovery baseline.
 
-- a power-only USB-C receptacle;
-- two 5.1 kΩ CC resistors;
-- the old `VBUS_RAW` naming and input topology.
+The later 18 × 29 mm compact experiment is electrically routed but mechanically rejected in its current form. Its vertically rotated PPTC places the raw-input copper pad into the same-net 5 V cable landing. That overlap passes DRC but obstructs a clear cable-soldering courtyard.
 
-Therefore the snapshot documents the transition; it does not yet implement the final input decision. The builder, wiring, placement, routing, and regenerated schematic/PCB must all be updated together before release.
+The next placement pass should test a single horizontal five-hole cable row, a horizontal PPTC aligned with raw-input-to-protected-output flow, a TVS above the connector courtyard, and a lower-height 3 × 2 pogo field. See the [2026-07-31 compact-layout visual review](reviews/2026-07-31/README.md).
 
 ## ESP32 module and RF geometry
 
@@ -296,23 +298,24 @@ Firmware current limiting is mandatory but does not replace correctly rated copp
 
 ## Open design work
 
-1. Remove board-mounted USB-C and both CC resistors from the canonical V2 implementation.
-2. Add the two-hole `5V_IN/GND` landing.
-3. Regenerate the schematic so the active project actually contains C883162.
-4. Reconcile every part and net against the target power architecture.
-5. Complete the approximately 18 × 32 mm portrait placement.
-6. Route the portrait board on two layers while preserving a useful ground reference.
-7. Verify that all protected 5 V current passes through the PPTC with no bypass.
-8. Size power copper for the validated product current and temperature rise.
-9. Run complete connectivity and EasyEDA DRC.
-10. Validate the ESP32 footprint and antenna keepout against Espressif documentation.
-11. Regenerate and physically validate the pogo fixture.
-12. Reconcile BOM and PnP outputs with actual JLC stock/classification.
-13. Generate and independently inspect Gerbers and drills.
-14. Bench-test LDO temperature and 3.3 V transients.
-15. Bench-test LED inrush, PPTC drop/trip/recovery, short behavior, and partial-fault heating.
-16. Confirm pigtail polarity, contact gender, wire gauge, and strain relief.
-17. Implement and test the firmware compatibility contract above.
+The 2026-07-31 routed baseline completed the no-USB schematic regeneration, C883162 protected-power topology, two-hole input landing, deterministic two-layer routing, connectivity, DRC, and save/reopen verification. A later 18 × 29 mm experiment reduced cable pads and vias while retaining zero DRC, but screenshot review exposed an unacceptable fuse/input mechanical overlap.
+
+Remaining work, in order:
+
+1. Freeze the current 18 × 29 mm experiment as a recoverable but rejected placement state.
+2. Rebuild the lower-half placement around an unobstructed connector courtyard; study one horizontal five-hole cable row rather than the current vertical LED-hole column.
+3. Rotate and move the PPTC so raw input enters one side, protected 5 V exits the other, and neither the body nor pads obstruct a cable hole.
+4. Move the TVS out of the connector row while retaining a short raw-5 V branch and explicit GND return.
+5. Evaluate a 3 × 2 underside pogo field to trade unused width for reduced board height and simpler bottom routing.
+6. Review the unrouted placement with body/courtyard, pad, edge, antenna, probe, and solder-tool clearances before generating copper.
+7. Rebuild deterministic routes and repeat connectivity, DRC, idempotence, persistence, and canonical close/reopen verification.
+8. Independently review the schematic, protected 5 V path, power-copper sizing, and layout.
+9. Validate the ESP32 footprint and antenna keepout against Espressif documentation.
+10. Regenerate and physically validate the pogo fixture.
+11. Reconcile BOM and PnP outputs with actual JLC stock/classification.
+12. Generate and independently inspect Gerbers and drills.
+13. Bench-test LDO temperature, 3.3 V transients, LED inrush, PPTC behavior, pigtails, enclosure thermal behavior, and RF range.
+14. Implement and test the firmware compatibility contract above.
 
 ## Release gate
 
