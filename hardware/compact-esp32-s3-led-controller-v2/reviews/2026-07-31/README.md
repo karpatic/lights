@@ -2,17 +2,19 @@
 
 Status: **placement redesign required; not fabrication-ready**
 
-This review records the current compact EasyEDA iteration after the board was reduced from the proven 18 × 32 mm recovery baseline to an experimental 18 × 29 mm layout. The screenshots are evidence for placement review, not manufacturing outputs.
+Historical update, 2026-08-03: this rejected 18 × 29 mm experiment is superseded by the accepted connector-first 18 × 27 mm routed recovery snapshot under [`../../snapshots/2026-08-03`](../../snapshots/2026-08-03/README.md). The screenshots below are preserved review history, not current proof and not manufacturing outputs.
+
+This review records the then-current compact EasyEDA iteration after the board was reduced from the proven 18 × 32 mm recovery baseline to an experimental 18 × 29 mm layout.
 
 ## Captured views
 
 ### Top copper and component placement
 
-![Current top-layer view](top-layer-current.png)
+![Historical 18 × 29 mm top-layer view](top-layer-current.png)
 
 ### Bottom copper and fixture routing
 
-![Current bottom-layer view](bottom-layer-current.png)
+![Historical 18 × 29 mm bottom-layer view](bottom-layer-current.png)
 
 Source screenshots supplied by Carlos from `/home/carlos/Downloads`:
 
@@ -21,7 +23,7 @@ Source screenshots supplied by Carlos from `/home/carlos/Downloads`:
 | `top-layer-current.png` | `70fd2277d0291a99aa26a073ffdb57acbd1d6e3ac585d949a73c3e095aa63bc8` |
 | `bottom-layer-current.png` | `82470496ad06e79e4b6351402d952187360d08d498568ab213ce76559b3c89b2` |
 
-## Current experimental state represented by the views
+## Historical experimental state represented by the views
 
 - outline: 18 × 29 mm;
 - 22 footprints;
@@ -41,7 +43,7 @@ These facts do not make the placement mechanically acceptable. EasyEDA permits s
 
 Carlos correctly identified that the power-input area looks overlaid by the fuse.
 
-The current deterministic placement puts:
+That deterministic placement put:
 
 - `J_5V_IN` 5 V hole center at `(4082.500, 3527.811)`;
 - `F_VBUS` head at `(4082.500, 3518.000)`, rotated 90°;
@@ -50,11 +52,11 @@ The current deterministic placement puts:
 
 The fuse pad therefore enters the 2.00 mm plated-hole landing around the same-net `5V_IN` hole. This is electrically legal and helped produce zero DRC, but it crowds the cable-soldering zone and makes the placement visually and mechanically ambiguous. `D_VBUS` is also packed into the bottom-right connector area, compounding the congestion.
 
-The current 18 × 29 mm routed result should be retained as an experimental recovery point, but this placement should not advance to Gerber generation.
+The 18 × 29 mm routed result is retained as rejected historical evidence, but this placement should not advance to Gerber generation.
 
 ## Recommended big redesign: connector-first horizontal architecture
 
-Do not repair the current placement one marker at a time. Rebuild the lower half around explicit mechanical zones and straight electrical flow.
+This review recommended not repairing that placement one marker at a time. The accepted 2026-08-03 snapshot followed the broader connector-first direction instead.
 
 ### 1. Create one five-hole cable row
 
@@ -79,7 +81,7 @@ Benefits:
 - no wire must be soldered beside a vertical column of other holes;
 - LED GND and input GND can share a clear central ground corridor;
 - the protected-5 V trunk can become a deliberate horizontal power spine;
-- the current lower-left connector column and its diagonal routes disappear;
+- the lower-left connector column and its diagonal routes disappear;
 - visual pin order becomes obvious during assembly and inspection.
 
 The exact left-to-right order remains provisional until wire colors, enclosure exits, polarity marking, and pigtail handling are reviewed.
@@ -110,7 +112,7 @@ INPUT 5V hole
 
 Place the 1812 PPTC horizontally above the connector courtyard, with its raw-input pad vertically aligned to the input 5 V hole and its protected output facing left. A useful prior study placed the head near `(4075.203, 3515.2)` at 180°; the next pass should test moving it slightly farther upward to improve soldering clearance.
 
-This arrangement is better than the current vertical fuse because:
+This arrangement was better than the vertical fuse because:
 
 - the series power path is visually self-explanatory;
 - the component body is not over the cable hole;
@@ -137,15 +139,15 @@ Use three readable bands below the ESP32 module:
 2. **data path:** AHCT buffer, local decoupling, pull-down, and 33 Ω output resistor grouped in signal-flow order near the LED DATA route;
 3. **control/protection:** EN network toward the right, then PPTC/TVS above the input connector.
 
-Reference designators and value text should be moved or reduced after placement so they do not obscure inspection. Silkscreen overlap is not the electrical defect, but the current text density makes real mechanical conflicts harder to see.
+Reference designators and value text should be moved or reduced after placement so they do not obscure inspection. Silkscreen overlap is not the electrical defect, but the text density made real mechanical conflicts harder to see.
 
 ## Bottom-side rethink
 
-The bottom view shows that long signal transports and the current 2 × 3 pogo field consume the lower routing aperture.
+The bottom view shows that long signal transports and the 2 × 3 pogo field consumed the lower routing aperture.
 
 ### Evaluate a 3 × 2 pogo field
 
-A 3-column × 2-row field uses more width but less board height than the current 2-column × 3-row field. Because width is fixed mainly by the ESP32 module while height is the compression target, this may be a better shape.
+A 3-column × 2-row field uses more width but less board height than the 2-column × 3-row field. Because width is fixed mainly by the ESP32 module while height is the compression target, this may be a better shape.
 
 Do not change it casually. A valid study must:
 
@@ -164,13 +166,13 @@ Moving the pogo field under the lower portion of the module or into a wider 3 ×
 - GND: explicit local returns plus named cross-island anchors;
 - no route should be retained merely because it made the previous placement pass DRC.
 
-The current 35-via count is a defensible result for the existing placement, not a sacred target. A true connector-first rearrangement may remove several signal detours, but the nine ESP32 exposed-pad vias and justified return anchors should not be sacrificed for appearance.
+The 35-via count was a defensible result for the rejected placement, not a sacred target. A true connector-first rearrangement may remove several signal detours, but the nine ESP32 exposed-pad vias and justified return anchors should not be sacrificed for appearance.
 
 ## Compression targets
 
 ### Recommended next target: 18 × 28 mm study
 
-An 18 × 28 mm board is a credible next study only if the connector row, fuse, TVS, and pogo field are moved as a system. Preserve approximately the current cable-pad edge margin rather than trimming the outline around unchanged holes.
+An 18 × 28 mm board was a credible next study only if the connector row, fuse, TVS, and pogo field moved as a system. Preserve approximately the same cable-pad edge margin rather than trimming the outline around unchanged holes.
 
 ### Do not target width reduction
 
@@ -185,11 +187,13 @@ The ESP32-S3-MINI-1 module already defines nearly all of the 18 mm width. Reduci
 
 These are architecture choices, not assumptions to apply to the existing source without electrical and manufacturing review.
 
-## Next implementation gate
+## Historical next implementation gate
+
+This was the gate recommended by the 2026-07-31 review. The accepted 2026-08-03 snapshot supersedes the rejected placement while preserving the remaining fabrication-release gates.
 
 Before rerouting again:
 
-1. freeze the current 18 × 29 mm zero-DRC source as an experimental snapshot;
+1. freeze the 18 × 29 mm zero-DRC source as an experimental snapshot;
 2. define the five-hole row and connector courtyard;
 3. place the PPTC, TVS, LDO group, level-shifter group, and pogo field with no copper;
 4. run body/courtyard, pad, edge, antenna, and probe-clearance checks;

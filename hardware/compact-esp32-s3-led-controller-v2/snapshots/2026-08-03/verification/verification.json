@@ -1,0 +1,75 @@
+{
+  "verified_at": "2026-08-03T16:05:42-04:00",
+  "scope": "EasyEDA Standard live editor, deterministic placement/power/signal reruns, persisted project JSON, save, close, and canonical PCB-child reopen",
+  "design_status": "verified routed recovery snapshot; not fabrication-ready",
+  "drc": {
+    "nets": "11 / 11",
+    "root": "DRC Errors (0)",
+    "categories": []
+  },
+  "live_and_reopened_counts": {
+    "footprints": 22,
+    "tracks": 53,
+    "vias": 30,
+    "copper_areas": 2
+  },
+  "persisted_shape_counts": {
+    "LIB": 22,
+    "TRACK": 53,
+    "VIA": 30,
+    "COPPERAREA": 2
+  },
+  "geometry": {
+    "outline_mm": [18.0, 27.0],
+    "connector_first": true,
+    "cable_holes": 5,
+    "cable_pad_diameter_mm": 2.0,
+    "cable_finished_hole_diameter_mm": 1.2,
+    "minimum_cable_copper_to_board_edge_mm": 1.49,
+    "underside_pogo_field": {
+      "pads": 6,
+      "columns": 3,
+      "rows": 2,
+      "column_pitch_mm": 2.0,
+      "row_pitch_mm": 3.0,
+      "pad_size_mm": [1.2, 1.2],
+      "drilled": false,
+      "layer": "BottomLayer"
+    }
+  },
+  "copper_fill_persistence": {
+    "areas": 2,
+    "reopened_fill_data_bytes": [19507, 29484],
+    "note": "After reopen EasyEDA serializes persisted cached fills in fillData rather than polygonArr. Both areas retained non-empty fillData and post-reopen DRC remained zero."
+  },
+  "idempotence": {
+    "full_placement_power_signal_rerun_semantically_identical": true,
+    "post_rerun_nets": "11 / 11",
+    "post_rerun_drc": "DRC Errors (0)"
+  },
+  "persistence": {
+    "save_passed": true,
+    "tab_close_passed": true,
+    "canonical_pcb_child_reopen_passed": true,
+    "post_reopen_source_invariants_passed": true,
+    "post_reopen_nets": "11 / 11",
+    "post_reopen_drc": "DRC Errors (0)"
+  },
+  "sha256": {
+    "PCB_Compact ESP32-S3 USB LED Controller V2.json": "4f17c6f3b260f19da9d8507d95fbd8ca19129bb6692a5b716d3e920ecd695b30",
+    "Compact ESP32-S3 USB LED Controller V2.json": "27df80459ec5d21dc5c2ec8750bbc0896af71a948fbe9dfe25d518b0ae9abc9f",
+    "info": "32676e83d387afc1ba7e4ef951ac4f5c785cfdbc9301d0aa80541eca15e4bcb9",
+    "place_compact_usb_led_controller_v2_pcb.py": "67083b178c2c29a2aa0baff89df44b87d108705f139f58dbed11eebb0de559c4",
+    "route_compact_usb_led_controller_v2_portrait_power.py": "96a6f7cda86d74ad358eed6e54262d4bbb24da11a6e8de6227de6a921031fb79",
+    "route_compact_usb_led_controller_v2_portrait_signals.py": "511afb7c90f050cb62f799a39a97197a8ba74c1368e15a873a8fcb89e50489bf"
+  },
+  "remaining_release_gates": [
+    "independent electrical and PCB-layout review",
+    "fabricator capability and stack-up confirmation",
+    "Gerber and drill export inspection",
+    "BOM and pick-and-place review",
+    "fixture regeneration for the 2.0 mm by 3.0 mm pogo field",
+    "assembled-board bring-up and load/thermal testing",
+    "firmware ESP32-S3/GPIO18/current-limit alignment"
+  ]
+}

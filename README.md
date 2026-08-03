@@ -36,7 +36,9 @@ Start with [`PROJECT_STATE.md`](PROJECT_STATE.md) for current status and resume 
 - Programming: six-pad UART fixture carrying 5V, GND, TX, RX, EN, and BOOT/GPIO0
 - Hardware authority: [`hardware/compact-esp32-s3-led-controller-v2/DESIGN.md`](hardware/compact-esp32-s3-led-controller-v2/DESIGN.md)
 
-The verified no-USB 18 × 32 mm routed recovery baseline is preserved under [`hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-07-31/`](hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-07-31/README.md). Carlos's newer 18 × 29 mm top/bottom board screenshots and the reason that compact placement was rejected are under [`hardware/compact-esp32-s3-led-controller-v2/reviews/2026-07-31/`](hardware/compact-esp32-s3-led-controller-v2/reviews/2026-07-31/README.md).
+The latest accepted hardware recovery point is the verified connector-first 18 × 27 mm routed snapshot under [`hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-08-03/`](hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-08-03/README.md). It closes deterministic routing, connectivity, zero-error EasyEDA DRC, idempotence, save/close/reopen, and persisted copper-fill checks, but it is still not fabrication-ready.
+
+The earlier no-USB 18 × 32 mm routed baseline remains under [`hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-07-31/`](hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-07-31/README.md). Carlos's 18 × 29 mm top/bottom screenshots and the reason that compact placement was rejected are preserved as superseded historical review evidence under [`hardware/compact-esp32-s3-led-controller-v2/reviews/2026-07-31/`](hardware/compact-esp32-s3-led-controller-v2/reviews/2026-07-31/README.md).
 
 The earlier [`2026-07-30` snapshot](hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-07-30/README.md) is intentionally retained as historical transition evidence. Its USB-era source and old fixture geometry are not the current design and must not be manufactured.
 
