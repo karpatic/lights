@@ -3,12 +3,18 @@
 This is the hardware track for the firmware and browser-control work in [`karpatic/lights`](https://github.com/karpatic/lights). It is a compact, production-oriented ESP32-S3 controller for a 5 V addressable LED rope.
 
 - [Current design record](DESIGN.md)
-- [Latest backed-up EasyEDA and automation snapshot](snapshots/2026-08-03/README.md)
+- [Latest checked-in EasyEDA and automation snapshot](snapshots/2026-08-04/README.md)
 - EasyEDA project name: `Compact ESP32-S3 USB LED Controller V2`
 - Working EasyEDA source: `/home/carlos/.easyeda/projects/Compact ESP32-S3 USB LED Controller V2/`
 - Working automation: `/home/carlos/.local/share/easyeda-agent-harness/`
 
-The latest checked-in snapshot is a verified routed recovery/reference artifact, not a fabrication release. It closes deterministic connector-first routing, connectivity, EasyEDA zero-error DRC, idempotence, save/close/reopen, and persisted copper-fill checks. The active design still requires independent review, manufacturing exports/review, fixture regeneration, bench and thermal validation, and firmware ESP32-S3/GPIO18/current-limit alignment.
+The latest checked-in EasyEDA V2 recovery/reference snapshot is the verified 2026-08-04 19 × 23 mm two-layer checkpoint with 22 footprints, 45 copper tracks plus one outline track, 28 vias, two filled copper areas, 11/11 connected nets, EasyEDA DRC 0, selected deterministic automation, verification evidence, and Carlos's current board image.
+
+Manufacturing intent for the current checkpoint is one-side JLC assembly of the ordinary bottom-side SMT only. Carlos installs/reflows the ESP32-S3 module on the otherwise SMT-empty top side and handles the top-side through-hole pigtails separately. This is still a two-copper-layer board.
+
+EasyEDA remains the mutable working authority. The checked-in snapshot is an immutable recovery/reference artifact, not a fabrication release or final visual-layout acceptance. The active design still requires independent review, fabrication-rule confirmation, Gerber/drill inspection, BOM/CPL reconciliation, fixture regeneration, bench/thermal/RF validation, and firmware ESP32-S3/GPIO18/current-limit alignment.
+
+The later V3 experiment was visually rejected and scrapped; its EasyEDA document, placement script, and seed were deleted. Preserve the V2 snapshots and reviews, but do not present V3 as active or retained design work.
 
 ## Relationship to this repository
 

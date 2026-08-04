@@ -1,6 +1,6 @@
 # Lights Project State
 
-Last reconciled: 2026-08-03
+Last reconciled: 2026-08-04
 
 This is the resume point for the `lights` repository. Read this first, then inspect the linked hardware design record before changing firmware, PCB, fixture, browser-control, audio, or mesh assumptions.
 
@@ -14,10 +14,14 @@ This is the resume point for the `lights` repository. Read this first, then insp
 - Audio/Meyda and DJ control remain active product direction in the notebooks and external DJ-panel notes. The repository does not currently contain a local `AudioContext`/`decodeAudioData` runtime.
 - ESP32 mesh behavior remains active product direction in the ESP32 and plan notebooks. The current firmware does not yet implement the ESP-NOW/ad-hoc mesh network.
 - The active hardware target is [`Compact ESP32-S3 USB LED Controller V2`](hardware/compact-esp32-s3-led-controller-v2/DESIGN.md), still design-in-progress and not fabrication-ready.
-- V2's latest accepted immutable-style recovery point is the verified connector-first 18 × 27 mm routed snapshot under [`hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-08-03/`](hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-08-03/README.md). It is not fabrication-ready, and there is no shared EasyEDA cloud URL.
-- The accepted 18 × 27 mm snapshot has 22 footprints, 53 total tracks including outline, 30 vias, two persisted filled GND areas, 11/11 connected nets, five aligned 2.00 mm cable pads with 1.20 mm finished holes, a bottom-only 3 × 2 undrilled pogo field, and fresh EasyEDA `DRC Errors (0)`.
+- V2's latest checked-in immutable recovery/reference point is the verified 19 × 23 mm snapshot under [`hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-08-04/`](hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-08-04/README.md). It captures the current EasyEDA source, selected deterministic automation, verification evidence, and Carlos's current board image, but it is not a fabrication release or final visual-layout acceptance.
+- The 2026-08-04 snapshot has two copper layers, 22 footprints, 45 copper tracks plus one outline track, 28 vias, two filled copper areas with five fill polygons, 11/11 connected nets, and fresh EasyEDA `DRC Errors (0)`.
+- Current assembly intent: JLC assembles ordinary bottom-side SMT only; Carlos installs/reflows `U_ESP` on the otherwise SMT-empty top side; the top-side through-hole `J_5V_IN` and `J_LED` cable landings are user-installed pigtails. Copper remains two-layer; one-side assembly does not mean one copper layer.
+- EasyEDA remains the mutable design authority. The repository snapshot is the checked-in recovery/reference archive, and there is still no shared EasyEDA cloud URL.
+- The previous 2026-08-03 verified connector-first 18 × 27 mm routed snapshot remains checked-in history under [`hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-08-03/`](hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-08-03/README.md), but it is no longer the latest snapshot.
+- The later V3 experiment was visually rejected and explicitly scrapped; its EasyEDA document, placement script, and seed were deleted. Do not present V3 as active or retained design work.
 - The 18 × 29 mm compact experiment is superseded and remains rejected history: its vertically rotated PPTC raw-input pad overlaps the same-net 5 V input landing and crowds cable soldering access. Zero DRC did not make that mechanical arrangement acceptable.
-- The 2026-08-03 verification closed deterministic placement/routing, connectivity, DRC, idempotence, save/close/reopen, and copper-fill persistence. It did not close independent design review, manufacturing exports/review, fixture regeneration, bench/thermal testing, or firmware ESP32-S3/GPIO18/current-limit alignment.
+- The 2026-08-04 19 × 23 mm checkpoint was restored/reopened from disk after V3 was scrapped and re-verified with no unsaved changes. It did not close independent design review, fabrication-rule confirmation, Gerber/drill inspection, BOM/CPL reconciliation, fixture regeneration, bench/thermal/RF testing, or firmware ESP32-S3/GPIO18/current-limit alignment.
 - Carlos's old top/bottom screenshots and the superseded 18 × 29 mm placement review remain preserved under [`hardware/compact-esp32-s3-led-controller-v2/reviews/2026-07-31/`](hardware/compact-esp32-s3-led-controller-v2/reviews/2026-07-31/README.md).
 - Current firmware still targets generic `esp32dev`, defaults LED data to GPIO15, and does not enforce `maxCurrent`.
 - V2 hardware uses ESP32-S3-MINI-1-N8 and routes LED data from GPIO18 through a 5 V AHCT buffer.
@@ -36,7 +40,9 @@ This is the resume point for the `lights` repository. Read this first, then insp
 - PlatformIO configuration: [`platformio.ini`](platformio.ini)
 - Hardware authority: [`hardware/compact-esp32-s3-led-controller-v2/DESIGN.md`](hardware/compact-esp32-s3-led-controller-v2/DESIGN.md)
 - Superseded compact-layout visual review: [`hardware/compact-esp32-s3-led-controller-v2/reviews/2026-07-31/README.md`](hardware/compact-esp32-s3-led-controller-v2/reviews/2026-07-31/README.md)
-- Latest routed hardware recovery snapshot: [`hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-08-03/README.md`](hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-08-03/README.md)
+- Current live EasyEDA working source: `/home/carlos/.easyeda/projects/Compact ESP32-S3 USB LED Controller V2/`
+- Latest checked-in hardware recovery snapshot: [`hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-08-04/README.md`](hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-08-04/README.md)
+- Earlier connector-first hardware recovery snapshot: [`hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-08-03/README.md`](hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-08-03/README.md)
 - Earlier routed hardware recovery snapshot: [`hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-07-31/README.md`](hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-07-31/README.md)
 - Earlier pre-routing recovery snapshot: [`hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-07-30/README.md`](hardware/compact-esp32-s3-led-controller-v2/snapshots/2026-07-30/README.md)
 
@@ -106,7 +112,7 @@ multiple light nodes
 
 Use [`DESIGN.md`](hardware/compact-esp32-s3-led-controller-v2/DESIGN.md) as the hardware source of truth. In short:
 
-Completed through the accepted 2026-08-03 connector-first recovery snapshot:
+Published in checked-in recovery history:
 
 - removed board-mounted USB-C and CC resistors;
 - added the two-hole regulated `5V_IN/GND` input landing;
@@ -116,15 +122,23 @@ Completed through the accepted 2026-08-03 connector-first recovery snapshot:
 - accepted a connector-first 18 × 27 mm routed recovery point with 22 footprints, 53 total tracks, 30 vias, two persisted filled GND areas, 11/11 nets, and fresh zero-error EasyEDA DRC;
 - aligned all five cable holes with 2.00 mm pads and 1.20 mm finished holes;
 - changed the underside programming targets to a bottom-only, undrilled 3 × 2 field with 1.20 mm pads, 2.00 mm column pitch, and 3.00 mm row pitch;
-- verified deterministic rerun idempotence plus save, real tab close, canonical PCB-child reopen, source-count persistence, fillData copper-fill persistence, and post-reopen zero DRC.
+- verified deterministic rerun idempotence plus save, real tab close, canonical PCB-child reopen, source-count persistence, fillData copper-fill persistence, and post-reopen zero DRC;
+- published the restored 19 × 23 mm V2 checkpoint as the 2026-08-04 recovery/reference snapshot with current EasyEDA source, selected deterministic automation, verification JSON, README, manifest, and current board image.
+
+Latest checked-in recovery snapshot:
+
+- restored/reopened V2 after the rejected V3 was scrapped, with no unsaved changes;
+- verified a 19 × 23 mm two-layer board with 22 footprints, 45 copper tracks plus one outline track, 28 vias, two filled copper areas, 11/11 connected nets, and fresh EasyEDA DRC 0;
+- keeps `U_ESP` on the top, ordinary JLC-assembled SMT on the bottom, and through-hole pigtail landings on the top as user-installed hardware;
+- remains a recovery/reference checkpoint, not a fabrication-ready release or final visual-layout acceptance.
 
 Remaining release gates:
 
 1. Complete an independent schematic/layout review.
 2. Confirm fabricator capability, stack-up, copper, clearance, annular-ring, and drill assumptions.
 3. Generate and visually inspect Gerbers and drill files.
-4. Reconcile BOM and pick-and-place outputs against the intended parts and transformed connector footprints.
-5. Regenerate and verify the programming fixture for the accepted 2.00 mm by 3.00 mm six-pad geometry.
+4. Reconcile BOM and pick-and-place outputs against the intended parts, transformed connector footprints, one-side JLC assembly, and `U_ESP` exclusion from JLC placement.
+5. Regenerate and verify the programming fixture from the final accepted PCB geometry; do not reuse stale fixture artifacts.
 6. Review manufacturer rules and archive the exact order package.
 7. Bench-test LDO temperature, LED load/inrush, PPTC behavior, pigtails, enclosure thermal behavior, and RF range.
 8. Align and validate firmware for ESP32-S3, GPIO18, and real current limiting.

@@ -1,0 +1,77 @@
+{
+  "verified_at": "2026-08-04T00:08:35-04:00",
+  "scope": "Current live/persisted EasyEDA V2 source after rejected V3 rollback; canonical placement/routing rerun; fresh DRC; user-captured current-board visual evidence",
+  "design_status": "verified 19 x 23 mm one-side-assembly recovery snapshot; not fabrication-ready or final visual acceptance",
+  "drc": {
+    "nets": "11 / 11",
+    "root": "DRC Errors (0)",
+    "categories": []
+  },
+  "counts": {
+    "footprints": 22,
+    "copper_tracks": 45,
+    "outline_tracks": 1,
+    "vias": 28,
+    "copper_areas": 2,
+    "fill_polygons": 5
+  },
+  "geometry": {
+    "outline_mm": [
+      19.0,
+      23.0
+    ],
+    "copper_layers": 2
+  },
+  "assembly_scope": {
+    "jlc_smt_side": "BottomLayer",
+    "jlc_ordinary_smt_footprints": 13,
+    "user_installed_top_smt": [
+      "U_ESP"
+    ],
+    "user_installed_through_hole": [
+      "J_5V_IN",
+      "J_LED"
+    ],
+    "note": "One-side assembly describes factory component placement; PCB copper remains two-layer."
+  },
+  "persistence": {
+    "active_document": "PCB_Compact ESP32-S3 USB LED Controller V2",
+    "saved_indicator_clean": true,
+    "restored_after_v3_scrap": true
+  },
+  "v3_rollback": {
+    "v3_document_present": false,
+    "v3_harness_artifacts_present": false,
+    "status": "rejected and scrapped"
+  },
+  "semantic_route_sha256": "465302616afdb1d33787bee18ba7cb5b10a968d4f12a1108e8a11bd2404198a3",
+  "visual_evidence": {
+    "file": "current-board.png",
+    "source": "/home/carlos/Downloads/esp32_board.png",
+    "sha256": "e8774b049543c59cc6cacf9c2951d7dd5c59e7475180f5f93ab27f4d199c50f0",
+    "provenance": "User-captured EasyEDA combined-layer screenshot supplied immediately after the verified V2 rollback.",
+    "authority": "Visual evidence only; native EasyEDA source remains design authority."
+  },
+  "sha256": {
+    "easyeda/Compact ESP32-S3 USB LED Controller V2.json": "27df80459ec5d21dc5c2ec8750bbc0896af71a948fbe9dfe25d518b0ae9abc9f",
+    "easyeda/PCB_Compact ESP32-S3 USB LED Controller V2.json": "611f47ea7eac81d45664eaf46b43888bea4806137c485beabc8c371dda104d35",
+    "easyeda/info": "55478e51c7aed495fc467f20deba8e865e2380cee803a2d8e352dbcc0e30496e",
+    "automation/build_compact_usb_led_controller_v2.py": "f0164d2dcf57ab08b2b044e48fc857081e645546165382f5fe19787544f1daa0",
+    "automation/wire_compact_usb_led_controller_v2.py": "411d59e497f6f50c3e1e069eb4fd06ae66b34fa9a1039994c99c8a31dbe642c7",
+    "automation/configure_compact_usb_led_controller_v2_two_layer.py": "9f966db4218c9dc85d6fe92f4934eda2fa0e24171ba16bc129db68f277efeeae",
+    "automation/place_compact_usb_led_controller_v2_pcb.py": "61403c3ca324470d27c8ac0614334b0316873dee81b09d91fc1679186523c435",
+    "automation/route_compact_usb_led_controller_v2_single_side.py": "fe7a40c5fe3dd8e8a446bb2e93a2d249dd8cd321611b424cc7a82c50720111ff",
+    "automation/compact_usb_led_controller_v2_state.json": "ab03bc7834544ee8b45422d4bcd814da79a0765d3304a9ddfa6ba90072abb8d3",
+    "automation/dependencies/build_esp32_lipo_led_board.py": "187ae360fa94927a58b85346f1314e8a0d09b5424dfafb4a195ddf2f6da0726a",
+    "verification/current-board.png": "e8774b049543c59cc6cacf9c2951d7dd5c59e7475180f5f93ab27f4d199c50f0"
+  },
+  "remaining_release_gates": [
+    "independent schematic and PCB-layout review",
+    "fabricator capability, stack-up, copper, clearance, annular-ring, and drill confirmation",
+    "Gerber and drill generation plus independent visual inspection",
+    "BOM/CPL reconciliation including U_ESP and pigtail exclusion from JLC placement",
+    "fixture regeneration from final accepted PCB geometry",
+    "assembled-board load, inrush, thermal, PPTC, pigtail, enclosure, and RF validation",
+    "firmware ESP32-S3, GPIO18, and enforced current-limit alignment"
+  ]
+}

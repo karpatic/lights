@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lights Notebook Viewer</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script
-      type="module"
-      src="https://cdn.jsdelivr.net/npm/ipynb2web@latest/dist/ipynb2web.browser.mjs"
-    ></script>
+
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="./index.css">
   </head>
@@ -49,6 +46,8 @@
     </div>
     <div id="content"></div>
     <script type="module">
+      import ipynb2web from 'https://cdn.jsdelivr.net/npm/ipynb2web@latest/dist/ipynb2web.browser.mjs';
+
       const routeMap = JSON.parse(document.getElementById('route-map').textContent);
       const routeAliases = JSON.parse(document.getElementById('route-aliases').textContent);
       const routesByPath = new Map(routeMap.map((route) => [route.path, route]));

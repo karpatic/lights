@@ -1,10 +1,10 @@
 # Compact ESP32-S3 LED Controller V2 — design record
 
-Last reconciled: 2026-08-03
+Last reconciled: 2026-08-04
 
 Status: **design in progress; not fabrication-ready**
 
-Repository association: this controller is the hardware target for [`karpatic/lights`](https://github.com/karpatic/lights). The latest accepted routed recovery point is backed up under [`snapshots/2026-08-03`](snapshots/2026-08-03/README.md). The earlier routed baseline is preserved under [`snapshots/2026-07-31`](snapshots/2026-07-31/README.md), and the superseded 18 × 29 mm placement review remains in [`reviews/2026-07-31`](reviews/2026-07-31/README.md).
+Repository association: this controller is the hardware target for [`karpatic/lights`](https://github.com/karpatic/lights). The latest checked-in recovery/reference point is the verified 19 × 23 mm V2 snapshot under [`snapshots/2026-08-04`](snapshots/2026-08-04/README.md). The previous 18 × 27 mm connector-first recovery point is preserved under [`snapshots/2026-08-03`](snapshots/2026-08-03/README.md), the earlier routed baseline is preserved under [`snapshots/2026-07-31`](snapshots/2026-07-31/README.md), and the superseded 18 × 29 mm placement review remains in [`reviews/2026-07-31`](reviews/2026-07-31/README.md).
 
 ## Product goal
 
@@ -39,18 +39,25 @@ V1 proved the electrical concept but is larger and more complicated than necessa
 - EasyEDA Standard 6.5.51 project: `Compact ESP32-S3 USB LED Controller V2`;
 - earlier routed baseline: **18 × 32 mm**;
 - superseded compact experiment, preserved but mechanically rejected: **18 × 29 mm**;
-- latest accepted connector-first routed recovery snapshot: **18 × 27 mm**;
+- previous connector-first routed recovery snapshot: **18 × 27 mm**;
+- latest checked-in recovery/reference snapshot: **19 × 23 mm**;
 - two copper layers;
 - ESP32-S3-MINI-1-N8 with embedded antenna;
 - antenna at the head, circuitry corridor in the middle, aligned cable/input landings at the foot;
 - baseline: 22 footprints, 61 tracks, 38 vias, two GND copper areas, complete connectivity, zero EasyEDA DRC errors, and successful hard close/reopen verification;
 - compact experiment: 22 footprints, 60 tracks, 35 vias, two GND copper areas, 11/11 nets, and fresh zero-error DRC;
-- accepted connector-first snapshot: 22 footprints, 53 total tracks including outline, 30 vias, two persisted filled GND areas, 11/11 nets, fresh zero-error DRC, deterministic rerun idempotence, and successful save/close/reopen verification;
-- accepted cable geometry: five aligned cable holes with 2.00 mm pads and 1.20 mm finished holes;
-- accepted programming geometry: six bottom-only, undrilled 1.20 mm square pogo pads in a 3 × 2 field with 2.00 mm column pitch and 3.00 mm row pitch;
+- previous 18 × 27 mm connector-first snapshot: 22 footprints, 53 total tracks including outline, 30 vias, two persisted filled GND areas, 11/11 nets, fresh zero-error DRC, deterministic rerun idempotence, and successful save/close/reopen verification;
+- latest 19 × 23 mm recovery/reference snapshot: 22 footprints, 45 copper tracks plus one outline track, 28 vias, two filled copper areas with five fill polygons, 11/11 connected nets, fresh zero-error DRC, restored/reopened from disk after V3 was scrapped, and no unsaved changes;
+- current assembly layout: `U_ESP` is on the top; all ordinary SMT support parts are on the bottom for one-side JLC assembly; top-side through-hole `J_5V_IN` and `J_LED` are user-installed pigtails rather than JLC SMT placements;
+- previous 18 × 27 mm cable geometry: five aligned cable holes with 2.00 mm pads and 1.20 mm finished holes;
+- previous 18 × 27 mm programming geometry: six bottom-only, undrilled 1.20 mm square pogo pads in a 3 × 2 field with 2.00 mm column pitch and 3.00 mm row pitch;
 - the 18 × 29 mm compact placement is not accepted because the vertical PPTC raw-input pad overlays the same-net 5 V input landing and crowds hand-solder access.
 
-The 18 × 27 mm snapshot is the latest accepted recovery point, but it is not a fabrication release.
+The 19 × 23 mm V2 snapshot is the latest checked-in immutable recovery/reference point. It is not a fabrication release or final visual-layout acceptance. EasyEDA remains the mutable PCB design authority; compare the snapshot with the live workspace before any restore.
+
+The 18 × 27 mm snapshot remains historical checked-in recovery evidence, but it is no longer the latest published recovery/reference point.
+
+The later V3 experiment was visually rejected and explicitly scrapped. Its EasyEDA document, V3 placement script, and seed were deleted; do not present V3 as active or retained design work.
 
 ## Target electrical architecture
 
@@ -80,7 +87,7 @@ Target interface:
 GND
 ```
 
-Accepted connector-first landing:
+Target pigtail landing:
 
 - two plated through-holes;
 - 3.00 mm pitch;
@@ -94,7 +101,7 @@ Do not label this input `BAT` or `LiPo`. A JST connector is acceptable only when
 
 A bare single-cell LiPo is unsupported. Supporting one would require a charger, cell protection, boost conversion, and a battery power-path/source-management design that V2 does not contain.
 
-The 2026-08-03 PCB places this input in the same horizontal five-hole cable row as the LED output.
+The 2026-08-04 snapshot preserves this as the top-side through-hole `J_5V_IN` pigtail landing for user installation, not JLC SMT assembly.
 
 ### LED output
 
@@ -106,7 +113,7 @@ DATA
 GND
 ```
 
-Accepted connector-first landing:
+Target pigtail landing:
 
 - three plated through-holes;
 - 3.00 mm pitch;
@@ -115,17 +122,19 @@ Accepted connector-first landing:
 - hand-soldered, replaceable pigtail;
 - enclosure-provided strain relief.
 
-The 2026-08-03 PCB places this output in the same horizontal five-hole cable row as the regulated 5 V input. External-facing connector type, contact gender, wire colors, wire gauge, pin order, and mating orientation must be verified on the actual purchased pigtail before fabrication.
+The 2026-08-04 snapshot preserves this as the top-side through-hole `J_LED` pigtail landing for user installation, not JLC SMT assembly. External-facing connector type, contact gender, wire colors, wire gauge, pin order, and mating orientation must be verified on the actual purchased pigtail before fabrication.
 
 ## Connector decision and current source
 
 The preferred production direction is **no board-mounted USB-C connector**. It saves connector and anchor area, removes the two USB-C CC resistors, simplifies routing, permits arbitrary case-connector placement, and avoids exposing two simultaneous 5 V source paths.
 
-The active V2 implementation removes the board-mounted USB-C receptacle and both CC resistors. It uses the external regulated `5V_IN/GND` pigtail landing and preserves the TVS/PPTC protected-power topology. The 2026-07-30 snapshot remains historical transition evidence; the 2026-07-31 routed snapshot is the no-USB recovery baseline.
+The active V2 implementation removes the board-mounted USB-C receptacle and both CC resistors. It uses the external regulated `5V_IN/GND` pigtail landing and preserves the TVS/PPTC protected-power topology. The top-side `J_5V_IN` and `J_LED` through-hole cable landings are intended for user-installed pigtails, not JLC SMT assembly. The 2026-07-30 snapshot remains historical transition evidence; the 2026-07-31 routed snapshot is the no-USB recovery baseline.
 
 The later 18 × 29 mm compact experiment is electrically routed but mechanically rejected. Its vertically rotated PPTC places the raw-input copper pad into the same-net 5 V cable landing. That overlap passes DRC but obstructs a clear cable-soldering courtyard.
 
-The accepted 2026-08-03 connector-first recovery point implements the horizontal five-hole cable row and lower-height 3 × 2 pogo field, then verifies deterministic rerun idempotence, save, real tab close, canonical PCB-child reopen, persisted source counts, persisted copper fills, and fresh zero-error DRC. After reopen, EasyEDA serialized the copper fills in `fillData` rather than `polygonArr`. See the [2026-08-03 recovery snapshot](snapshots/2026-08-03/README.md) for the machine-readable evidence.
+The checked-in 2026-08-03 connector-first recovery point implements the horizontal five-hole cable row and lower-height 3 × 2 pogo field, then verifies deterministic rerun idempotence, save, real tab close, canonical PCB-child reopen, persisted source counts, persisted copper fills, and fresh zero-error DRC. After reopen, EasyEDA serialized the copper fills in `fillData` rather than `polygonArr`. See the [2026-08-03 recovery snapshot](snapshots/2026-08-03/README.md) for that historical machine-readable evidence.
+
+The latest checked-in 2026-08-04 recovery/reference point captures the restored 19 × 23 mm V2 source, selected deterministic automation, verification JSON, verified manifest, and Carlos's current board image. It has 11/11 connected nets and DRC 0, but it remains recovery evidence rather than a fabrication package. See the [2026-08-04 recovery snapshot](snapshots/2026-08-04/README.md) for the machine-readable evidence and visual reference.
 
 ## ESP32 module and RF geometry
 
@@ -246,7 +255,7 @@ EN
 BOOT / GPIO0
 ```
 
-Accepted connector-first snapshot:
+Previous 2026-08-03 connector-first snapshot:
 
 - six bottom-side bare copper pads;
 - three columns × two rows;
@@ -257,11 +266,19 @@ Accepted connector-first snapshot:
 - no BOM/PnP entries;
 - top-left board chamfer as a physical anti-reversal key.
 
-The fixture generator in the 2026-07-30 snapshot still expects the older 36 × 25 mm board, 2.54 mm pitch, and 1.50 mm pads. Its generated fixture artifacts are archived as stale reference only. Regenerate all CSV/SVG/DXF/OpenSCAD outputs from the accepted 2026-08-03 PCB source and selected physical probe geometry.
+The fixture generator in the 2026-07-30 snapshot still expects the older 36 × 25 mm board, 2.54 mm pitch, and 1.50 mm pads. Its generated fixture artifacts are archived as stale reference only. Regenerate all CSV/SVG/DXF/OpenSCAD outputs from the final accepted PCB source and selected physical probe geometry.
 
 The fixture must use current-limited 5 V and must not power the board while another 5 V input is attached unless deliberate source isolation is added.
 
 ## Manufacturing and cost record
+
+Current assembly intent:
+
+- JLC assembles the ordinary bottom-side SMT parts only.
+- Carlos installs/reflows the ESP32-S3 module on the otherwise SMT-empty top side.
+- Carlos handles the through-hole input and LED pigtails separately.
+- The PCB remains a two-copper-layer design; one-side assembly does not mean one copper layer.
+- BOM/CPL review must explicitly exclude `U_ESP` from JLC placement and keep `J_5V_IN`/`J_LED` out of the SMT placement set.
 
 Preliminary estimates discussed before final connector removal and final JLC quotation:
 
@@ -275,7 +292,7 @@ With the BHFUSE substitution, the provisional electronic BOM estimate became app
 - $5.90 per board at quantity 5;
 - $4.37 per board at quantity 100.
 
-These are planning figures, not quotes. They exclude shipping, tax, enclosure, test/programming labor, in-house pigtail labor, fixture amortization, and possible JLC extended-part/setup charges. Removing board-mounted USB-C and its CC resistors should lower the eventual BOM further.
+These are planning figures, not quotes. They exclude shipping, tax, enclosure, test/programming labor, in-house pigtail labor, ESP32 top-side install labor, fixture amortization, and possible JLC extended-part/setup charges. Removing board-mounted USB-C and its CC resistors should lower the eventual BOM further.
 
 At quantity 100, PnP is expected to be worth the small incremental recurring cost. At quantity 5, manual assembly can be cheaper only when labor is treated as free.
 
@@ -305,15 +322,17 @@ Firmware current limiting is mandatory but does not replace correctly rated copp
 
 ## Open design work
 
-The 2026-07-31 routed baseline completed the no-USB schematic regeneration, C883162 protected-power topology, two-hole input landing, deterministic two-layer routing, connectivity, DRC, and save/reopen verification. A later 18 × 29 mm experiment reduced cable pads and vias while retaining zero DRC, but screenshot review exposed an unacceptable fuse/input mechanical overlap. The 2026-08-03 connector-first recovery snapshot supersedes that experiment with an accepted 18 × 27 mm route, 53 total tracks, 30 vias, five aligned cable holes, 3 × 2 bottom-only pogo pads, complete connectivity, fresh zero-error DRC, deterministic rerun idempotence, and save/close/reopen persistence.
+The 2026-07-31 routed baseline completed the no-USB schematic regeneration, C883162 protected-power topology, two-hole input landing, deterministic two-layer routing, connectivity, DRC, and save/reopen verification. A later 18 × 29 mm experiment reduced cable pads and vias while retaining zero DRC, but screenshot review exposed an unacceptable fuse/input mechanical overlap. The checked-in 2026-08-03 connector-first recovery snapshot superseded that experiment with an accepted 18 × 27 mm route, 53 total tracks, 30 vias, five aligned cable holes, 3 × 2 bottom-only pogo pads, complete connectivity, fresh zero-error DRC, deterministic rerun idempotence, and save/close/reopen persistence.
+
+After a later V3 concept was visually rejected, its EasyEDA document, V3 placement script, and seed were deleted. The V2 source was restored/reopened from disk with no unsaved changes and re-verified as a 19 × 23 mm two-layer checkpoint with 22 footprints, 45 copper tracks plus one outline track, 28 vias, two filled copper areas, 11/11 connected nets, and DRC 0. That state is now published as the 2026-08-04 checked-in recovery/reference snapshot, not as a fabrication release or final visual-layout acceptance.
 
 Remaining work, in order:
 
 1. Independently review the schematic, protected 5 V path, power-copper sizing, and layout.
 2. Validate the ESP32 footprint and antenna keepout against Espressif documentation.
 3. Confirm fabricator capability, stack-up, copper, clearance, annular-ring, and drill assumptions.
-4. Regenerate and physically validate the pogo fixture for the accepted 2.00 mm by 3.00 mm field.
-5. Reconcile BOM and PnP outputs with actual JLC stock/classification.
+4. Regenerate and physically validate the pogo fixture from the final accepted PCB geometry.
+5. Reconcile BOM and PnP/CPL outputs with actual JLC stock/classification, one-side bottom SMT assembly, `U_ESP` exclusion, and pigtail exclusion.
 6. Generate and independently inspect Gerbers and drills.
 7. Bench-test LDO temperature, 3.3 V transients, LED inrush, PPTC behavior, pigtails, enclosure thermal behavior, and RF range.
 8. Implement and test the firmware compatibility contract above.
@@ -328,7 +347,7 @@ Do not label V2 fabrication-ready until all of the following are true:
 - no PPTC bypass;
 - adequate 5 V copper width and thermal behavior;
 - valid all-layer antenna keepout;
-- production BOM and PnP reconciliation;
+- production BOM and PnP/CPL reconciliation, including bottom-side JLC SMT scope and `U_ESP` exclusion;
 - Gerber/drill parsing and visual inspection;
 - source-derived fixture coordinates and printed coupon validation;
 - LDO, LED load, fuse, cable, and enclosure thermal tests;
