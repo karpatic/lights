@@ -58,9 +58,10 @@ This is the resume point for the `lights` repository. Read this first, then insp
 - Plan: `#/plan`
 - Board Designs: `#/board_designs`
 - Diagrams: `#/diagrams`
-- Licensing: `#/licensing`
+- Compliance: `#/compliance`
 
 Friendly routes from the cleanup pass, such as `#/hardware`, `#/firmware`, `#/browser`, `#/flashing`, and `#/architecture`, are aliases into the restored route set.
+The old `#/licensing` route remains a backward-compatible alias for Compliance.
 
 ## Implemented And Planned Flow
 
